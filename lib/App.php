@@ -43,15 +43,13 @@ abstract class App {
 		}
 
 		if ($opts['host'] === self::API) {
-			if (isset($opts['origin'])) {
-				$origin = $opts['origin'];
-			} else if (isset($opts['referer'])) {
-				$origin = preg_replace('/^((?:https?:\/\/)?[^\/]+).*$/', '$1', $opts['referer']);
-			} else {
-				$origin = '*';
+			$origin = isset($opts['origin']) ? $opts['origin'] : null;
+			if ($origin !== Config::WWWHOST) {
+				// return an error
+				exit(0);
 			}
 
-			header('Access-Control-Allow-Origin: ' . $origin);
+			header('Access-Control-Allow-Origin: http://' . Config::WWWHOST);
 
 			if ($opts['method'] === 'OPTIONS') {
 				header('Access-Control-Max-Age: 3600');
