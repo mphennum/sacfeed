@@ -33,7 +33,7 @@ abstract class App {
 
 		if ($opts['host'] === self::API) {
 			$origin = isset($opts['origin']) ? $opts['origin'] : null;
-			if ($origin !== 'http://' . Config::WWWHOST) {
+			if (!Config::DEV && $origin !== 'http://' . Config::WWWHOST) {
 				// return an error
 				exit(0);
 			}
