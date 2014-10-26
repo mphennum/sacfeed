@@ -33,30 +33,13 @@ class Request {
 
 		return $output;
 
-		$response = [
-			'request' => [
-				'resource' => $opts['resource'],
-				'action' => $opts['action'],
-				'params' => $opts['params'],
-				'format' => $opts['format']
-			],
-			'status' => $this->response->getStatus()
-		];
-
-		$result = $this->response->getResult();
-		if (!empty($result)) {
-			$response['result'] = $result;
-		}
+		$result = &$this->response->result;
+		$status = &$this->response->status;
 
 		ob_start('ob_gzhandler');
-		include __DIR__ . '/../tmpl/' . $this->host . '/' . $this->template . '.php';
+		include __DIR__ . '/../tmpl/' . $opts['host'] . '/' . $opts['template'] . '.php';
 		$output = ob_get_contents();
 		ob_end_clean();
-
-		$ttl = $response['status']['ttl'];
-		if (!$this->cached && $ttl !== 0) {
-			Cache::set($this->host . ':' . $this->resource . ':' . $this->action, $this->params, $response, $ttl, true);
-		}
 
 		return $output;
 	}
