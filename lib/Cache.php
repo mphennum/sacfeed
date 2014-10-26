@@ -72,7 +72,7 @@ abstract class Cache {
 	}
 
 	static public function createKey($key, $params = []) {
-		$cacheKey = 'kon:' . $key;
+		$cacheKey = 'sacfeed:' . $key;
 		foreach ($params as $key => $value) {
 			$cacheKey .= ':' . $key . '=' . (string) $value;
 		}
