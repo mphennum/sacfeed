@@ -49,6 +49,8 @@ abstract class App {
 
 		//$opts['ip'] = isset($_COOKIE['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : null;
 		//$opts['agent'] = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null;
+		$opts['secure'] = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
+		$opts['dnt'] = (isset($_SERVER['HTTP_DNT']) && $_SERVER['HTTP_DNT']);
 		$opts['referer'] = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : null;
 		$opts['uri'] = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : null;
 		$opts['sid'] = isset($_COOKIE['sid']) ? $_COOKIE['sid'] : null;
