@@ -45,38 +45,6 @@ class Response {
 		];
 	}
 
-	// result
-
-	public function getResult() {
-		return $this->result;
-	}
-
-	public function setResult($result) {
-		$this->result = $result;
-	}
-
-	public function __get($key) {
-		if (!isset($this->result[$key])) {
-			return null;
-		}
-
-		return $this->result[$key];
-	}
-
-	public function __set($key, $value) {
-		$this->result[$key] = $value;
-	}
-
-	// ttl
-
-	public function getTTL() {
-		return $this->status['ttl'];
-	}
-
-	public function setTTL($ttl) {
-		$this->status['ttl'] = $ttl;
-	}
-
 	// status
 
 	public function getStatus() {
