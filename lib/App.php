@@ -13,7 +13,7 @@ abstract class App {
 	static public function init() {
 		register_shutdown_function([__CLASS__, 'shutdown']);
 
-		if (!Config::DEV && PHP_SAPI !== 'cli') {
+		if (!Config::DEVMODE && PHP_SAPI !== 'cli') {
 			error_reporting(E_ERROR);
 			ob_start();
 		}
@@ -33,7 +33,7 @@ abstract class App {
 
 		if ($opts['host'] === self::API) {
 			$origin = isset($opts['origin']) ? $opts['origin'] : null;
-			if (!Config::DEV && $origin !== 'http://' . Config::WWWHOST) {
+			if (!Config::DEVMODE && $origin !== 'http://' . Config::WWWHOST) {
 				// return an error
 				exit(0);
 			}
@@ -65,8 +65,10 @@ abstract class App {
 		$request->handle();
 		$output = $request->view();
 
-		while (ob_get_level() !== 0) {
-			ob_end_clean();
+		if (!Config::DEVMODE) {
+			while (ob_get_level() !== 0) {
+				ob_end_clean();
+			}
 		}
 
 		echo $output;
