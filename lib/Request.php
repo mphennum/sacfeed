@@ -4,6 +4,7 @@ namespace Sacfeed;
 
 class Request {
 	static public $map = [];
+
 	static public $actions = [
 		'GET' => 'read',
 		'POST' => 'create',
@@ -12,7 +13,7 @@ class Request {
 	];
 
 	public $opts;
-	public $action;
+	public $template;
 	public $response;
 
 	public function __construct($opts = []) {
@@ -27,17 +28,11 @@ class Request {
 	public function view() {
 		$opts = &$this->opts;
 
-		ob_start('ob_gzhandler');
-		$output = '<pre>' . json_encode($opts, JSON_PRETTY_PRINT) . '</pre>';
-		ob_end_clean();
-
-		return $output;
-
 		$result = &$this->response->result;
 		$status = &$this->response->status;
 
 		ob_start('ob_gzhandler');
-		include __DIR__ . '/../tmpl/' . $opts['host'] . '/' . $opts['template'] . '.php';
+		include __DIR__ . '/../tmpl/' . ($opts['host'] === App::API ? 'api/' : 'www/') . $this->template . '.php';
 		$output = ob_get_contents();
 		ob_end_clean();
 
@@ -74,13 +69,47 @@ class Request {
 
 	static private function apiFactory($opts = []) {
 		$opts['format'] = isset($opts['format']) ? $opts['format'] : 'json';
-		return new Request($opts);
+
+		$request = new Request($opts);
+		$request->template = $opts['format'];
+		$request->response->notImplemented();
+		return $request;
 	}
 
 	static private function wwwFactory($opts = []) {
 		$opts['format'] = isset($opts['format']) ? $opts['format'] : 'html';
-		$opts['resource'] = ($opts['resource'] === '') ? 'home' : $opts['resource'];
-		return new Request($opts);
+		$opts['resource'] = ($opts['resource'] === '') ? 'article' : $opts['resource'];
+
+		if ($opts['action'] !== 'read') {
+			$request = new Request($opts);
+			$request->template = 'error';
+			$request->response->methodNotAllowed();
+			return $request;
+		}
+
+		if ($opts['format'] !== 'html') {
+			$request = new Request($opts);
+			$request->template = 'error';
+			$request->response->notAcceptable('Format not supported.');
+			return $request;
+		}
+
+		$file = realpath(__DIR__ . '/../req/www/' . $opts['resource'] . '.php');
+		if (!isset(self::$map[$file]) && file_exists($file)) {
+			require $file;
+		}
+
+		if (isset(self::$map[$file])) {
+			$class = 'Sacfeed\\WWW\\' . self::$map[$file];
+			$request = new $class($opts);
+			$request->template = 'article';
+			return $request;
+		}
+
+		$request = new Request($opts);
+		$request->template = 'error';
+		$request->response->notFound();
+		return $request;
 	}
 
 	static public function decodeParam($param) {

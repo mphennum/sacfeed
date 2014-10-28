@@ -35,14 +35,16 @@ class Response {
 
 	public $result;
 	public $status;
+	public $ttl;
 
 	public function __construct($opts = []) {
 		$this->result = [];
 		$this->status = [
 			'code' => 200,
-			'message' => self::$codes[200],
-			'ttl' => 0
+			'message' => self::$codes[200]
 		];
+
+		$this->ttl = 0;
 	}
 
 	// status
@@ -60,13 +62,15 @@ class Response {
 		$this->status['code'] = $code;
 		$this->status['message'] = self::$codes[$code];
 
-		if ($reason !== null) {
+		if ($reason === null) {
+			unset($this->status['reason']);
+		} else {
 			$this->status['reason'] = $reason;
 		}
 
 		if ($code > 399 || $code < 200) {
 			$this->result = [];
-			$this->status['ttl'] = 0;
+			$this->ttl = 0;
 		}
 	}
 
