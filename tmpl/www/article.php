@@ -9,7 +9,7 @@
 
 <body>
 
-<p>error</p>
+<p>articles</p>
 
 <pre><?= json_encode($opts, JSON_PRETTY_PRINT) ?></pre>
 <pre><?= json_encode($status, JSON_PRETTY_PRINT) ?></pre>
