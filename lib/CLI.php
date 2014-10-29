@@ -2,6 +2,8 @@
 
 namespace Sacfeed;
 
+use Exception;
+
 class CLI {
 	static public $usleep = 250000; // (micro seconds) sleep timer for title, subtitle, notice, warning, error
 
@@ -145,15 +147,8 @@ class CLI {
 		usleep(self::$usleep * 2);
 	}
 
-	static public function error($message, $exit = true, $code = 0) {
-		echo self::$color['light-red'], $message;
-		self::newline();
-
-		if ($exit) {
-			exit($code);
-		}
-
-		usleep(self::$usleep * 5);
+	static public function error($message) {
+		throw new Exception($message);
 	}
 
 	// light purple
