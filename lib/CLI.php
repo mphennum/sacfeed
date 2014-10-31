@@ -2,8 +2,6 @@
 
 namespace Sacfeed;
 
-use Exception;
-
 class CLI {
 	static public $usleep = 250000; // (micro seconds) sleep timer for title, subtitle, notice, warning, error
 
@@ -70,7 +68,7 @@ class CLI {
 		self::newline();
 	}
 
-	static public function printr($array = [], $field = null, $tabs = 0) {
+	static public function printr($array = [], $field = null, $tabs = 0, $end = false) {
 		$spacing = '';
 		for ($i = 0; $i < $tabs; ++$i) {
 			$spacing .= '    ';
@@ -82,10 +80,15 @@ class CLI {
 			self::message($spacing . $field . ' => [');
 		}
 
+		$i = 0;
+		$n = count($array);
 		++$tabs;
 		foreach ($array as $key => $value) {
-			if (is_array($value)) {
-				self::printr($value, $key, $tabs);
+			++$i;
+			$last = ($i === $n);
+
+			if (is_array($value) && !empty($value)) {
+				self::printr($value, $key, $tabs, $last);
 				continue;
 			}
 
@@ -93,37 +96,38 @@ class CLI {
 			if (is_object($value)) {
 				$color = self::$color['light-yellow'];
 				$value = '[Object]';
+			} else if (is_array($value)) {
+				$value = '[]';
 			} else if (is_string($value)) {
 				$color = self::$color['green'];
-				$value = '"' . str_replace('"', '\\"', $value) . '"';
+				$value = '"' . str_replace('"', self::$color['light-yellow'] . '\\"' . self::$color['green'], $value) . '"';
 			} else if (is_bool($value)) {
 				$color = self::$color['light-blue'];
-				$value = $value ? 'true' : 'false';
+				$value = ($value ? 'true' : 'false');
 			} else if ($value === null) {
 				$color = self::$color['light-red'];
 				$value = 'null';
 			}
 
 			if (strpos($value, "\n") === false) {
-				self::message($spacing . '    ' . $key . ' => ', $value, $color, ',');
+				self::message($spacing . '    ' . $key . ' => ', $value, $color, $last ? '' : ',');
 				continue;
 			}
 
-			$extraspaces = strlen($spacing . '    ' . $key . ' => ');
-			if (is_string($value)) {
-				++$extraspaces; // for the opening quote
-			}
-
 			$extraspacing = '';
-			for ($i = 0; $i < $extraspaces; ++$i) {
+			for ($j = 0, $l = strlen($spacing . '    ' . $key . ' => '); $j < $l; ++$j) {
 				$extraspacing .= ' ';
 			}
 
-			self::message($spacing . '    ' . $key . ' => ', str_replace("\n", "\n" . $extraspacing, $value), $color, ',');
+			if (is_string($value)) {
+				$extraspacing .= ' '; // for the opening quote
+			}
+
+			self::message($spacing . '    ' . $key . ' => ', str_replace("\n", "\n" . $extraspacing, $value), $color, $last ? '' : ',');
 		}
 
-		if ($field === null) {
-			self::message(']');
+		if ($field === null || $end) {
+			self::message($spacing . ']');
 		} else {
 			self::message($spacing . '],');
 		}
@@ -148,6 +152,9 @@ class CLI {
 	}
 
 	static public function error($message) {
+		echo self::$color['light-red'], $message;
+		self::newline();
+
 		throw new Exception($message);
 	}
 
