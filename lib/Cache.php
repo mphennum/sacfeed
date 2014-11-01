@@ -6,7 +6,7 @@ use Memcached;
 
 abstract class Cache {
 	const SET = 0;
-	const DELETE = 1;
+	const DEL = 1;
 
 	static private $queue;
 	static private $memcached;
@@ -61,7 +61,7 @@ abstract class Cache {
 
 		if ($shutdown) {
 			self::$queue[] = [
-				'type' => self::DELETE,
+				'type' => self::DEL,
 				'key' => $key
 			];
 
@@ -86,7 +86,7 @@ abstract class Cache {
 		foreach (self::$queue as $item) {
 			if ($item['type'] === self::SET) {
 				self::$memcached->set($item['key'], $item['value'], $item['ttl'] - 1);
-			} else if ($item['type'] === self::DELETE) {
+			} else if ($item['type'] === self::DEL) {
 				self::$memcached->delete($item['key']);
 			}
 		}
