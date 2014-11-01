@@ -23,6 +23,8 @@ abstract class Database {
 		self::$mongo->wtimeout = 30000;
 	}
 
+	// queued commands
+
 	static public function batchInsert($collection, $records) {
 		self::$queue[] = [
 			'type' => self::BATCH,
@@ -84,9 +86,9 @@ abstract class Database {
 			$where = &$command['where'];
 
 			if ($type === self::UPDATE) {
-				$collection->update($where, $command['record']);
+				$collection->update($where, $command['record'], ['w' => 0]);
 			} else if ($type === self::REMOVE) {
-				$collection->remove($where);
+				$collection->remove($where, ['w' => 0]);
 			}
 		}
 
@@ -97,9 +99,9 @@ abstract class Database {
 
 			$collection = self::$mongo->$$collection;
 			if (count($batch) === 1) {
-				$collection->insert($batch[0]);
+				$collection->insert($batch[0], ['w' => 0]);
 			} else {
-				$collection->batchInsert($batch, ['continueOnError' => true]);
+				$collection->batchInsert($batch, ['continueOnError' => true, 'w' => 0]);
 			}
 		}
 	}
