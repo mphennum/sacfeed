@@ -3,6 +3,7 @@
 namespace Sacfeed;
 
 class CLI {
+	static public $verbose = false;
 	static public $usleep = 250000; // (micro seconds) sleep timer for title, subtitle, notice, warning, error
 
 	static public $color = [
@@ -26,6 +27,10 @@ class CLI {
 	];
 
 	static public function title($message) {
+		if (!self::$verbose) {
+			return;
+		}
+
 		$separator = '';
 		for ($i = 0, $n = strlen($message); $i < $n; ++$i) {
 			$separator .= '=';
@@ -38,6 +43,10 @@ class CLI {
 	}
 
 	static public function subtitle($message) {
+		if (!self::$verbose) {
+			return;
+		}
+
 		$separator = '';
 		for ($i = 0, $n = strlen($message); $i < $n; ++$i) {
 			$separator .= '-';
@@ -50,6 +59,10 @@ class CLI {
 	}
 
 	static public function message($message, $second = null, $color = null, $end = '') {
+		if (!self::$verbose) {
+			return;
+		}
+
 		if ($second === null) {
 			if ($color === null) {
 				$color = self::$color['white'];
@@ -69,6 +82,10 @@ class CLI {
 	}
 
 	static public function printr($array = [], $field = null, $tabs = 0, $end = false) {
+		if (!self::$verbose) {
+			return;
+		}
+
 		$spacing = '';
 		for ($i = 0; $i < $tabs; ++$i) {
 			$spacing .= '    ';
@@ -133,27 +150,31 @@ class CLI {
 		}
 	}
 
-	static public function newline() {
+	static public function newline($force = false) {
+		if (!$force && !self::$verbose) {
+			return;
+		}
+
 		echo self::$color['reset'], "\n";
 	}
 
 	static public function notice($message) {
 		echo self::$color['blue-green'], $message;
-		self::newline();
+		self::newline(true);
 
 		usleep(self::$usleep);
 	}
 
 	static public function warning($message) {
 		echo self::$color['light-yellow'], $message;
-		self::newline();
+		self::newline(true);
 
 		usleep(self::$usleep * 2);
 	}
 
 	static public function error($message) {
 		echo self::$color['light-red'], $message;
-		self::newline();
+		self::newline(true);
 
 		throw new Exception($message);
 	}
