@@ -14,8 +14,8 @@ class Response {
 		400 => 'Bad Request', // request had malformed syntax
 		401 => 'Unauthorized', // user authentication failed
 		403 => 'Forbidden', // unreachable request, authentication wont fix
-		404 => 'Not Found', // resource cannot be found
-		405 => 'Method Not Allowed', // method / action not allowed
+		404 => 'Not Found', // resource / action cannot be found
+		405 => 'Method Not Allowed', // method not allowed
 		406 => 'Not Acceptable', // format not allowed
 		409 => 'Conflict', // conflict with params
 		410 => 'Gone', // resource has been deleted
