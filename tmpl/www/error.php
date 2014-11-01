@@ -11,10 +11,6 @@
 
 <p>error</p>
 
-<pre><?= json_encode($opts, JSON_PRETTY_PRINT) ?></pre>
-<pre><?= json_encode($status, JSON_PRETTY_PRINT) ?></pre>
-<pre><?= json_encode($result, JSON_PRETTY_PRINT) ?></pre>
-
 </body>
 
 </html>
