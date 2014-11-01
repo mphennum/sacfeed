@@ -20,8 +20,8 @@ abstract class App {
 
 		self::$utc = new DateTimeZone('UTC');
 
-		//Database::init();
-		//Cache::init();
+		Database::init();
+		Cache::init();
 	}
 
 	static public function handle() {
@@ -75,15 +75,15 @@ abstract class App {
 	}
 
 	static public function shutdown() {
-		if (function_exists('fastcgi_finish_request')) {
+		if (!Config::DEVMODE && function_exists('fastcgi_finish_request')) {
 			fastcgi_finish_request();
 		}
 
 		ignore_user_abort(true);
 		set_time_limit(0);
 
-		//Database::shutdown();
-		//Cache::shutdown();
+		Database::shutdown();
+		Cache::shutdown();
 
 		gc_collect_cycles();
 		exit(0);
