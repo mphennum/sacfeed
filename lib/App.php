@@ -42,7 +42,7 @@ abstract class App {
 
 			if ($opts['method'] === 'OPTIONS') {
 				header('Access-Control-Max-Age: 3600');
-				header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+				header('Access-Control-Allow-Methods: GET, HEAD, OPTIONS');
 				exit(0);
 			}
 		}
