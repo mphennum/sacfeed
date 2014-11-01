@@ -49,13 +49,13 @@ class Request {
 		include __DIR__ . '/../tmpl/' . (($opts['host'] === App::API) ? 'api/' : 'www/') . $this->template . '.php';
 		$output = ob_get_contents();
 
-		if ($opts['host'] === App::WWW) {
+		/*if ($opts['host'] === App::WWW) {
 			$output .= '<pre>';
 			$output .= json_encode($response, JSON_PRETTY_PRINT) . "\n";
 			$output .= json_encode($opts, JSON_PRETTY_PRINT) . "\n";
 		} else {
 			$output .= json_encode($opts, JSON_PRETTY_PRINT) . "\n";
-		}
+		}*/
 
 		ob_end_clean();
 
@@ -151,9 +151,23 @@ class Request {
 			return $request;
 		}
 
+		$file = realpath(__DIR__ . '/../req/api/' . $opts['resource'] . '/' . $opts['action'] . '.php');
+
+		if (!isset(self::$map[$file]) && file_exists($file)) {
+			require $file;
+		}
+
+		//exit((string) $opts['host']);
+		if (isset(self::$map[$file])) {
+			$class = 'Sacfeed\\API\\' . self::$map[$file];
+			$request = new $class($opts);
+			$request->template = &$opts['format'];
+			return $request;
+		}
+
 		$request = new Request($opts);
 		$request->template = &$opts['format'];
-		$request->response->notImplemented();
+		$request->response->badRequest('Invalid request');
 		return $request;
 	}
 
