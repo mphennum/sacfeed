@@ -39,13 +39,12 @@ abstract class Database {
 		];
 	}
 
-	static public function update($collection, $where, $record, $options = []) {
+	static public function update($collection, $where, $record) {
 		self::$queue[] = [
 			'type' => self::UPDATE,
 			'collection' => $collection,
 			'where' => $where,
-			'record' => $record,
-			'options' => $options
+			'record' => $record
 		];
 	}
 
@@ -85,13 +84,13 @@ abstract class Database {
 			$where = &$command['where'];
 
 			if ($type === self::UPDATE) {
-				$collection->update($where, $command['record'], $command['options']);
+				$collection->update($where, $command['record']);
 			} else if ($type === self::REMOVE) {
 				$collection->remove($where);
 			}
 		}
 
-		foreach ($batches as $batch) {
+		foreach ($batches as $collection => $batch) {
 			if (empty($batch)) {
 				continue;
 			}
