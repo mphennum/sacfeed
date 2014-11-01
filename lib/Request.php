@@ -18,7 +18,7 @@ class Request {
 
 	public function __construct($opts = []) {
 		$this->opts = &$opts;
-		$this->response = new Response($opts);
+		$this->response = new Response();
 	}
 
 	public function handle() {
@@ -49,7 +49,7 @@ class Request {
 
 		$parts = explode('.', $uri);
 		if (count($parts) === 1) {
-			$opts['resource'] = $parts[0];
+			$opts['resource'] = &$parts[0];
 		} else {
 			$opts['format'] = array_pop($parts);
 			$opts['resource'] = implode('.', $parts);
@@ -71,7 +71,7 @@ class Request {
 		$opts['format'] = isset($opts['format']) ? $opts['format'] : 'json';
 
 		$request = new Request($opts);
-		$request->template = $opts['format'];
+		$request->template = &$opts['format'];
 		$request->response->notImplemented();
 		return $request;
 	}

@@ -37,7 +37,7 @@ class Response {
 	public $status;
 	public $ttl;
 
-	public function __construct($opts = []) {
+	public function __construct() {
 		$this->result = [];
 		$this->status = [
 			'code' => 200,
