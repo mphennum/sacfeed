@@ -5,6 +5,7 @@ namespace Sacfeed;
 class Request {
 	static public $map = [];
 
+	// default actions
 	static public $actions = [
 		'GET' => 'read',
 		'POST' => 'create',
@@ -13,11 +14,15 @@ class Request {
 	];
 
 	public $opts;
+	public $method;
+	public $params;
 	public $template;
 	public $response;
 
 	public function __construct($opts = []) {
 		$this->opts = &$opts;
+		$this->method = 'GET';
+		$this->params = [];
 		$this->response = new Response();
 	}
 
@@ -31,9 +36,27 @@ class Request {
 		$result = &$this->response->result;
 		$status = &$this->response->status;
 
+		$code = &$status['code'];
+		if ($code === 200) {
+			$response = $result;
+		} else if ($code === 204) {
+			$response = null;
+		} else {
+			$response = $status;
+		}
+
 		ob_start('ob_gzhandler');
-		include __DIR__ . '/../tmpl/' . ($opts['host'] === App::API ? 'api/' : 'www/') . $this->template . '.php';
+		include __DIR__ . '/../tmpl/' . (($opts['host'] === App::API) ? 'api/' : 'www/') . $this->template . '.php';
 		$output = ob_get_contents();
+
+		if ($opts['host'] === App::WWW) {
+			$output .= '<pre>';
+			$output .= json_encode($response, JSON_PRETTY_PRINT) . "\n";
+			$output .= json_encode($opts, JSON_PRETTY_PRINT) . "\n";
+		} else {
+			$output .= json_encode($opts, JSON_PRETTY_PRINT) . "\n";
+		}
+
 		ob_end_clean();
 
 		return $output;
@@ -69,6 +92,64 @@ class Request {
 
 	static private function apiFactory($opts = []) {
 		$opts['format'] = isset($opts['format']) ? $opts['format'] : 'json';
+
+		// no resource
+		if ($opts['resource'] === '') {
+			$request = new Request($opts);
+			$request->template = &$opts['format'];
+			$request->response->badRequest('No resource given');
+			return $request;
+		}
+
+		// invalid format
+		if (!file_exists(__DIR__ . '/../tmpl/api/' . $opts['format'] . '.php')) {
+			$request = new Request($opts);
+			$request->template = 'json';
+			$request->response->notAcceptable('Format not allowed');
+			return $request;
+		}
+
+		$resource = explode('/', $opts['resource']);
+		$opts['resource'] = array_shift($resource);
+
+		if (!empty($resource)) {
+			$final = $resource[count($resource) - 1];
+			foreach (self::$actions as $method => $action) {
+				// default actions, use method instead
+				if ($final === $action) {
+					$request = new Request($opts);
+					$request->template = &$opts['format'];
+					$request->response->notFound('Action not found');
+					return $request;
+				}
+			}
+
+			$opts['action'] = implode('/', $resource);
+		}
+
+		// invalid method
+		if ($opts['method'] !== 'GET') {
+			$request = new Request($opts);
+			$request->template = &$opts['format'];
+			$request->response->methodNotAllowed('Only GET permitted');
+			return $request;
+		}
+
+		// invalid resource
+		if (!file_exists(__DIR__ . '/../req/api/' . $opts['resource'] . '/')) {
+			$request = new Request($opts);
+			$request->template = &$opts['format'];
+			$request->response->notFound('Resource not found');
+			return $request;
+		}
+
+		// invalid action
+		if (!file_exists(__DIR__ . '/../req/api/' . $opts['resource'] . '/' . $opts['action'] . '.php')) {
+			$request = new Request($opts);
+			$request->template = &$opts['format'];
+			$request->response->notFound('Action not found');
+			return $request;
+		}
 
 		$request = new Request($opts);
 		$request->template = &$opts['format'];
