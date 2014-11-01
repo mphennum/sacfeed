@@ -11,30 +11,33 @@ abstract class Database {
 	const UPDATE = 3;
 	const REMOVE = 4;
 
-	static public $mongo;
+	static private $client;
 	static private $queue;
 
-	static public function init() {
-		self::$queue = [];
+	static public $mongo;
 
-		$client = new MongoClient();
-		self::$mongo = $client->sacfeed;
+	static public function init() {
+		self::$client = new MongoClient(Config::DBHOST);
+
+		self::$mongo = self::$client->sacfeed;
 		self::$mongo->w = 0;
 		self::$mongo->wtimeout = 30000;
+
+		self::$queue = [];
 	}
 
 	// commands
 
-	static public function findOne() {
-
+	static public function distinct($collection, $field, $query = []) {
+		return self::$mongo->$collection->distinct($field, $query);
 	}
 
-	static public function find() {
-
+	static public function find($collection, $query = [], $projection = []) {
+		return self::$mongo->$collection->find($query, $projection);
 	}
 
-	static public function distinct() {
-
+	static public function findOne($collection, $query = [], $projection = []) {
+		return self::$mongo->$collection->findOne($query, $projection);
 	}
 
 	static public function batchInsert($collection, $records = [], $w = 0) {
@@ -92,7 +95,7 @@ abstract class Database {
 		self::$mongo->$collection->insert($record, ['w' => $w]);
 	}
 
-	static public function update($collection, $where = [], $record = [], $w = 0, $multi = false) {
+	static public function update($collection, $query = [], $record = [], $w = 0, $multi = false) {
 		if (empty($record)) {
 			return;
 		}
@@ -101,7 +104,7 @@ abstract class Database {
 			self::$queue[] = [
 				'type' => self::UPDATE,
 				'collection' => $collection,
-				'where' => $where,
+				'query' => $query,
 				'record' => $record,
 				'multi' => $multi
 			];
@@ -109,15 +112,15 @@ abstract class Database {
 			return;
 		}
 
-		self::$mongo->$collection->update($where, $record, ['w' => $w, 'multiple' => $multi]);
+		self::$mongo->$collection->update($query, $record, ['w' => $w, 'multiple' => $multi]);
 	}
 
-	static public function remove($collection, $where = [], $w = 0, $multi = false) {
+	static public function remove($collection, $query = [], $w = 0, $multi = false) {
 		if ($w === 0) {
 			self::$queue[] = [
 				'type' => self::REMOVE,
 				'collection' => $collection,
-				'where' => $where,
+				'query' => $query,
 				'w' => $w,
 				'multi' => $multi
 			];
@@ -129,7 +132,7 @@ abstract class Database {
 			$w = 0;
 		}
 
-		self::$mongo->$collection->remove($where, ['w' => $w, 'justOne' => !$multi]);
+		self::$mongo->$collection->remove($query, ['w' => $w, 'justOne' => !$multi]);
 	}
 
 	static public function shutdown() {
@@ -161,9 +164,9 @@ abstract class Database {
 			// update / remove
 
 			if ($type === self::UPDATE) {
-				self::update($collection, $command['where'], $command['record'], false, $command['multi']);
+				self::update($collection, $command['query'], $command['record'], false, $command['multi']);
 			} else if ($type === self::REMOVE) {
-				self::remove($collection, $command['where'], false, $command['multi']);
+				self::remove($collection, $command['query'], false, $command['multi']);
 			}
 		}
 
@@ -180,5 +183,7 @@ abstract class Database {
 				self::batchInsert($collection, $batch, false);
 			}
 		}
+
+
 	}
 }
