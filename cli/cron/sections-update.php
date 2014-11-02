@@ -3,6 +3,8 @@
 
 namespace Sacfeed;
 
+use Sacfeed\DB\Section;
+
 require __DIR__ . '/../../sys/bootstrap.php';
 
 $opts = getopt('v', ['help']);
@@ -72,21 +74,15 @@ for ($i = 0, $n = count($urls); $i < $n; ++$i) {
 
 	$seen[$slug] = true;
 
-	$name = &$names[$i];
-	$id = strtolower($name);
-	$id = preg_replace('/[^a-z0-9]+/i', '-', $id);
+	$section = new Section();
+	$section->genUUID();
+	$section->name = $names[$i];
+	$section->slug = $slug;
 
-	$section = [
-		'_id' => $id,
-		'name' => $name,
-		'slug' => $slug
-	];
+	CLI::message($section->name . ': ', $section->slug);
 
-	CLI::message($name . ': ', $slug);
-
-	$sections[] = $section;
+	$sections[] = $section->getFields();
 }
 
-$mongo = Database::$mongo;
-$mongo->sections->remove([], ['justOne' => false, 'w' => 1]);
-$mongo->sections->batchInsert($sections, ['continueOnError' => true]);
+Database::remove(Section::COLLECTION, [], 1, true);
+Database::batchInsert(Section::COLLECTION, $sections);
