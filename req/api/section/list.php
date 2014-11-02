@@ -1,22 +1,31 @@
 <?php
 
-namepsace Sacfeed\API;
+namespace Sacfeed\API;
 
-class Section {
+use Sacfeed\Request;
+use Sacfeed\DB\Section;
 
-	public function __construct() {
-		$this->params = [
-			'n' => [
-				'type' => 'int',
-				'default' => 0, // all
-				'required' => false
-			]
-		];
+class SectionList extends Request {
+
+	public function __construct($opts = []) {
+		parent::__construct($opts);
+
+		$this->method = 'GET';
+		$this->params = [];
 	}
 
 	public function handle() {
+		$cursor = Section::find();
 
+		$sections = [];
+		foreach ($cursor as $record) {
+			$section = new Section();
+			$section->setFields($record);
+			$sections[] = $section->getAPIFields();
+		}
+
+		$this->response->result['sections'] = $sections;
 	}
 }
 
-Request::$map[__FILE__] = 'Section';
+Request::$map[__FILE__] = 'SectionList';
