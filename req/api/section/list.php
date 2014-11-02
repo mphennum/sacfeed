@@ -15,16 +15,21 @@ class SectionList extends Request {
 	}
 
 	public function handle() {
+		if (!parent::handle()) {
+			return false;
+		}
+
 		$cursor = Section::find();
 
 		$sections = [];
 		foreach ($cursor as $record) {
-			$section = new Section();
-			$section->setFields($record);
+			$section = new Section($record);
 			$sections[] = $section->getAPIFields();
 		}
 
 		$this->response->result['sections'] = $sections;
+
+		return true;
 	}
 }
 
