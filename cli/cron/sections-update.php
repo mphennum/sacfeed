@@ -51,13 +51,13 @@ $skip = ['/classifieds/' => true];
 $seen = [];
 $sections = [];
 for ($i = 0, $n = count($urls); $i < $n; ++$i) {
-	$url = &$urls[$i];
+	$url = $urls[$i];
 	if (!preg_match('/^(?:https?:)?\/\/' . str_replace('.', '\\.', Config::SACBEEHOST) . '(.*)$/', $url, $m)) {
 		CLI::warning('BAD URL - ' . $url);
 		continue;
 	}
 
-	$slug = &$m[1];
+	$slug = $m[1];
 	$slug = strtolower($slug);
 	$slug = trim($slug, '/');
 	$slug = ($slug === '') ? '/' : '/' . $slug . '/';

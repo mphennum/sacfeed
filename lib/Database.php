@@ -47,7 +47,7 @@ abstract class Database {
 
 		$seen = [];
 		foreach ($records as $record) {
-			$id = &$record['_id'];
+			$id = $record['_id'];
 			if (isset($seen[$id])) {
 				throw new Exception('Duplicate ID found in batch insert');
 			}
@@ -138,8 +138,8 @@ abstract class Database {
 	static public function shutdown() {
 		$batches = [];
 		foreach (self::$queue as $command) {
-			$type = &$command['type'];
-			$collection = &$command['collection'];
+			$type = $command['type'];
+			$collection = $command['collection'];
 
 			// auto batch
 

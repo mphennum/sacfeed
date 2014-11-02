@@ -20,23 +20,85 @@ class Request {
 	public $response;
 
 	public function __construct($opts = []) {
-		$this->opts = &$opts;
+		$this->opts = $opts;
 		$this->method = 'GET';
 		$this->params = [];
 		$this->response = new Response();
 	}
 
 	public function handle() {
-		// do nothing
+		if ($this->response->status['code'] !== 200) {
+			return false;
+		}
+
+		if ($this->opts['method'] !== $this->method) {
+			$this->response->methodNotAllowed('Only "' . $this->method . '" method allowed for this request');
+			return false;
+		}
+
+		$params = $this->opts['params'];
+		foreach ($params as $key => $param) {
+			if (!isset($this->params[$key])) {
+				$this->response->notAcceptable('Parameter "' . $key . '" not allowed in this context');
+				return false;
+			}
+		}
+
+		foreach ($this->params as $key => $param) {
+			$required = $param['required'];
+			$exists = array_key_exists($key, $params);
+
+			if (!$required && !$exists) {
+				$this->params[$key] = $this->params[$key]['default'];
+				continue;
+			}
+
+			if ($required && !$exists) {
+				$this->response->notAcceptable('Missing required parameter "' . $key . '"');
+				return false;
+			}
+
+			$type = $param['type'];
+			$value = $params[$key];
+			if ($type === 'int') {
+				if (!is_int($value)) {
+					$this->response->notAcceptable('Parameter "' . $key . '" must be an integer');
+					return false;
+				}
+
+				$value = (int) $value;
+
+				if (isset($param['min']) && $value < $param['min']) {
+					$this->response->rangeNotSatisfiable('Parameter "' . $key . '" cannot be less than ' . $param['min']);
+					return false;
+				}
+
+				if (isset($param['max']) && $value > $param['max']) {
+					$this->response->rangeNotSatisfiable('Parameter "' . $key . '" cannot be greater than ' . $param['max']);
+					return false;
+				}
+			} else if ($type === 'string') {
+				$value = (string) $value;
+
+				if (isset($param['regex']) && !preg_match($param['regex'], $value)) {
+					$this->response->notAcceptable('Parameter "' . $key . '" has an invalid value');
+					return false;
+				}
+			}
+
+			$this->params[$key] = $value;
+		}
+
+		return true;
 	}
 
 	public function view() {
-		$opts = &$this->opts;
+		$opts = $this->opts;
 
-		$result = &$this->response->result;
-		$status = &$this->response->status;
+		$result = $this->response->result;
+		$status = $this->response->status;
 
-		$code = &$status['code'];
+		$code = $status['code'];
 		if ($code === 200) {
 			$response = $result;
 		} else if ($code === 204) {
@@ -72,7 +134,7 @@ class Request {
 
 		$parts = explode('.', $uri);
 		if (count($parts) === 1) {
-			$opts['resource'] = &$parts[0];
+			$opts['resource'] = $parts[0];
 		} else {
 			$opts['format'] = array_pop($parts);
 			$opts['resource'] = implode('.', $parts);
@@ -85,7 +147,7 @@ class Request {
 			$params[rawurldecode($key)] = self::decodeParam($value);
 		}
 
-		$opts['params'] = &$params;
+		$opts['params'] = $params;
 
 		return ($opts['host'] === App::API) ? self::apiFactory($opts) : self::wwwFactory($opts);
 	}
@@ -96,7 +158,7 @@ class Request {
 		// no resource
 		if ($opts['resource'] === '') {
 			$request = new Request($opts);
-			$request->template = &$opts['format'];
+			$request->template = $opts['format'];
 			$request->response->badRequest('No resource given');
 			return $request;
 		}
@@ -118,7 +180,7 @@ class Request {
 				// default actions, use method instead
 				if ($final === $action) {
 					$request = new Request($opts);
-					$request->template = &$opts['format'];
+					$request->template = $opts['format'];
 					$request->response->notFound('Action not found');
 					return $request;
 				}
@@ -130,7 +192,7 @@ class Request {
 		// invalid method
 		if ($opts['method'] !== 'GET') {
 			$request = new Request($opts);
-			$request->template = &$opts['format'];
+			$request->template = $opts['format'];
 			$request->response->methodNotAllowed('Only GET permitted');
 			return $request;
 		}
@@ -138,7 +200,7 @@ class Request {
 		// invalid resource
 		if (!file_exists(__DIR__ . '/../req/api/' . $opts['resource'] . '/')) {
 			$request = new Request($opts);
-			$request->template = &$opts['format'];
+			$request->template = $opts['format'];
 			$request->response->notFound('Resource not found');
 			return $request;
 		}
@@ -146,7 +208,7 @@ class Request {
 		// invalid action
 		if (!file_exists(__DIR__ . '/../req/api/' . $opts['resource'] . '/' . $opts['action'] . '.php')) {
 			$request = new Request($opts);
-			$request->template = &$opts['format'];
+			$request->template = $opts['format'];
 			$request->response->notFound('Action not found');
 			return $request;
 		}
@@ -161,12 +223,12 @@ class Request {
 		if (isset(self::$map[$file])) {
 			$class = 'Sacfeed\\API\\' . self::$map[$file];
 			$request = new $class($opts);
-			$request->template = &$opts['format'];
+			$request->template = $opts['format'];
 			return $request;
 		}
 
 		$request = new Request($opts);
-		$request->template = &$opts['format'];
+		$request->template = $opts['format'];
 		$request->response->badRequest('Invalid request');
 		return $request;
 	}

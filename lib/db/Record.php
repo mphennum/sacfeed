@@ -14,7 +14,7 @@ class Record {
 	protected $fields;
 
 	public function __construct($collection, $fields = []) {
-		$this->collection = &$collection;
+		$this->collection = $collection;
 		$this->fields = array_merge(['_id' => null], $fields);
 	}
 

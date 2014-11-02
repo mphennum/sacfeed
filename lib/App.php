@@ -56,9 +56,9 @@ abstract class App {
 		$opts['sid'] = isset($_COOKIE['sid']) ? $_COOKIE['sid'] : null;
 
 		if ($opts['method'] === 'POST' || $opts['method'] === 'PUT') {
-			$opts['params'] = &$_POST;
+			$opts['params'] = $_POST;
 		} else {
-			$opts['params'] = &$_GET;
+			$opts['params'] = $_GET;
 		}
 
 		$request = Request::factory($opts);

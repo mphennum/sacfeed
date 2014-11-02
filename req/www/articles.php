@@ -25,8 +25,8 @@ class Articles extends Request {
 			$articles[] = $article->getAPIFields();
 		}
 
-		$this->response->result['articles'] = &$articles;
-		$this->response->result['sections'] = &$sections;
+		$this->response->result['articles'] = $articles;
+		$this->response->result['sections'] = $sections;
 	}
 }
 

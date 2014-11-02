@@ -11,6 +11,7 @@ class Response {
 		301 => 'Moved Permanently', // request can be found at a new location
 		304 => 'Not Modified', // resource has not been modified since last request
 
+		// all 4xx status will return a 400 http header
 		400 => 'Bad Request', // request had malformed syntax
 		401 => 'Unauthorized', // user authentication failed
 		403 => 'Forbidden', // unreachable request, authentication wont fix
@@ -21,9 +22,10 @@ class Response {
 		410 => 'Gone', // resource has been deleted
 		411 => 'Length Required', // length param is required
 		412 => 'Precondition Failed', // resource is not yet accessible
-		416 => 'Range Not Satisfiable', // request out of range for available resources
+		416 => 'Range Not Satisfiable', // request out of range for available resources, or min/max value
 		429 => 'Too Many Requests', // rate limit hit
 
+		// all 5xx status will return a 500 http header
 		500 => 'Internal Server Error', // server side error
 		501 => 'Not Implemented', // functionality not yet implemeneted
 		502 => 'Bad Gateway', // a gateway has failed (database, cache, etc)
