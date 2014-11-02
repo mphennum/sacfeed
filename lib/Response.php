@@ -6,12 +6,12 @@ class Response {
 	static public $codes = [
 		200 => 'OK', // request was successful
 		201 => 'Created', // resource has been created
+		202 => 'Accepted', // successful update or delete
 		204 => 'No Content', // no content to return
 
 		301 => 'Moved Permanently', // request can be found at a new location
 		304 => 'Not Modified', // resource has not been modified since last request
 
-		// all 4xx status will return a 400 http header
 		400 => 'Bad Request', // request had malformed syntax
 		401 => 'Unauthorized', // user authentication failed
 		403 => 'Forbidden', // unreachable request, authentication wont fix
@@ -20,12 +20,10 @@ class Response {
 		406 => 'Not Acceptable', // format not allowed, invalid param value
 		409 => 'Conflict', // conflict with params
 		410 => 'Gone', // resource has been deleted
-		411 => 'Length Required', // length param is required
 		412 => 'Precondition Failed', // resource is not yet accessible
 		416 => 'Range Not Satisfiable', // request out of range for available resources, or min/max value
 		429 => 'Too Many Requests', // rate limit hit
 
-		// all 5xx status will return a 500 http header
 		500 => 'Internal Server Error', // server side error
 		501 => 'Not Implemented', // functionality not yet implemeneted
 		502 => 'Bad Gateway', // a gateway has failed (database, cache, etc)
@@ -86,6 +84,10 @@ class Response {
 		$this->setStatus(201, $reason);
 	}
 
+	public function accepted($reason = null) {
+		$this->setStatus(202, $reason);
+	}
+
 	public function noContent($reason = null) {
 		$this->setStatus(204, $reason);
 	}
@@ -129,10 +131,6 @@ class Response {
 
 	public function conflict($reason = null) {
 		$this->setStatus(409, $reason);
-	}
-
-	public function lengthRequired($reason = null) {
-		$this->setStatus(411, $reason);
 	}
 
 	public function preconditionFailed($reason = null) {
