@@ -75,7 +75,7 @@ class Record {
 
 	public function findOne($id) {
 		$this->fields = Database::findOne($this->collection, ['_id' => $id]);
-		return ($this->fields === null);
+		return ($this->fields !== null);
 	}
 
 	public function insert($w = 0) {
