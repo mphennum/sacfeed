@@ -173,7 +173,7 @@ class Request {
 
 	static private function wwwFactory($opts = []) {
 		$opts['format'] = isset($opts['format']) ? $opts['format'] : 'html';
-		$opts['resource'] = ($opts['resource'] === '') ? 'article' : $opts['resource'];
+		$opts['resource'] = ($opts['resource'] === '') ? 'articles' : $opts['resource'];
 
 		if ($opts['action'] !== 'read') {
 			$request = new Request($opts);
