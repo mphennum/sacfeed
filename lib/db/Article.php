@@ -7,7 +7,7 @@ use Sacfeed\Database;
 class Article extends Record {
 	const COLLECTION = 'articles';
 
-	public function __construct() {
+	public function __construct($fields = null) {
 		parent::__construct(self::COLLECTION, [
 			'title' => null,
 			'subtitle' => null,
@@ -16,8 +16,12 @@ class Article extends Record {
 			'content' => null,
 			'summary' => null,
 			'url' => null,
-			'published' => null
+			'ts' => null
 		]);
+
+		if ($fields !== null) {
+			$this->setFields($fields);
+		}
 	}
 
 	public function getAPIFields() {
@@ -29,7 +33,7 @@ class Article extends Record {
 			'content' => $this->fields['content'],
 			'summary' => $this->fields['summary'],
 			'url' => $this->fields['url'],
-			'published' => $this->fields['published']
+			'ts' => $this->fields['ts']
 		];
 	}
 

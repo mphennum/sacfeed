@@ -7,11 +7,15 @@ use Sacfeed\Database;
 class Section extends Record {
 	const COLLECTION = 'sections';
 
-	public function __construct() {
+	public function __construct($fields = null) {
 		parent::__construct(self::COLLECTION, [
 			'name' => null,
 			'slug' => null
 		]);
+
+		if ($fields !== null) {
+			$this->setFields($fields);
+		}
 	}
 
 	public function getAPIFields() {
