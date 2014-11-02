@@ -60,6 +60,8 @@ class ArticleList extends Request {
 			return false;
 		}
 
+		$section->updateTS();
+
 		$find = ['section' => $this->params['section']];
 		if (isset($this->params['a'])) {
 			$article = new Article();

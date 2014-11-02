@@ -2,6 +2,8 @@
 
 namespace Sacfeed\DB;
 
+use MongoDate;
+
 use Sacfeed\Database;
 
 class Section extends Record {
@@ -24,6 +26,10 @@ class Section extends Record {
 			'name' => $this->fields['name'],
 			'ts' => $this->fields['ts']->sec * 1000 + ($this->fields['ts']->usec / 1000),
 		];
+	}
+
+	public function updateTS($w = 0) {
+		Database::update(self::COLLECTION, ['_id' => $this->fields['_id']], ['$set' => ['ts' => new MongoDate()]], $w, false);
 	}
 
 	static public function find($query = [], $projection = []) {
