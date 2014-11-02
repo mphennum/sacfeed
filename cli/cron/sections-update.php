@@ -57,29 +57,28 @@ for ($i = 0, $n = count($urls); $i < $n; ++$i) {
 		continue;
 	}
 
-	$slug = $m[1];
-	$slug = strtolower($slug);
-	$slug = trim($slug, '/');
-	$slug = ($slug === '') ? '/' : '/' . $slug . '/';
+	$id = $m[1];
+	$id = strtolower($id);
+	$id = trim($id, '/');
+	$id = ($id === '') ? '/' : '/' . $id . '/';
 
-	if (isset($seen[$slug])) {
-		CLI::message('DUPLICATE SLUG - ' . $slug);
+	if (isset($seen[$id])) {
+		CLI::message('DUPLICATE SLUG - ' . $id);
 		continue;
 	}
 
-	if (isset($skip[$slug])) {
-		CLI::message('SKIPPING SLUG - ' . $slug);
+	if (isset($skip[$id])) {
+		CLI::message('SKIPPING SLUG - ' . $id);
 		continue;
 	}
 
-	$seen[$slug] = true;
+	$seen[$id] = true;
 
 	$section = new Section();
-	$section->genUUID();
+	$section->_id = $id;
 	$section->name = $names[$i];
-	$section->slug = $slug;
 
-	CLI::message($section->name . ': ', $section->slug);
+	CLI::message($section->_id . ': ', $section->name);
 
 	$sections[] = $section->getFields();
 }

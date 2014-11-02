@@ -9,6 +9,7 @@ class Article extends Record {
 
 	public function __construct($fields = null) {
 		parent::__construct(self::COLLECTION, [
+			'section' => null,
 			'title' => null,
 			'subtitle' => null,
 			'author' => null,
@@ -26,6 +27,7 @@ class Article extends Record {
 
 	public function getAPIFields() {
 		return [
+			'section' => $this->fields['section'],
 			'title' => $this->fields['title'],
 			'subtitle' => $this->fields['subtitle'],
 			'author' => $this->fields['author'],

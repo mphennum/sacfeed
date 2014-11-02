@@ -9,8 +9,7 @@ class Section extends Record {
 
 	public function __construct($fields = null) {
 		parent::__construct(self::COLLECTION, [
-			'name' => null,
-			'slug' => null
+			'name' => null
 		]);
 
 		if ($fields !== null) {
@@ -20,8 +19,8 @@ class Section extends Record {
 
 	public function getAPIFields() {
 		return [
-			'name' => $this->fields['name'],
-			'slug' => $this->fields['slug']
+			'id' => $this->fields['_id'],
+			'name' => $this->fields['name']
 		];
 	}
 
