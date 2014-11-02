@@ -19,16 +19,14 @@ class SectionList extends Request {
 			return false;
 		}
 
-		$cursor = Section::find();
-
 		$sections = [];
+		$cursor = Section::find();
 		foreach ($cursor as $record) {
 			$section = new Section($record);
 			$sections[] = $section->getAPIFields();
 		}
 
 		$this->response->result['sections'] = $sections;
-
 		return true;
 	}
 }

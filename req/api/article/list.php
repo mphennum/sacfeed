@@ -3,8 +3,9 @@
 namespace Sacfeed\API;
 
 use Sacfeed\Config;
-use Sacfeed\Database;
 use Sacfeed\Request;
+use Sacfeed\DB\Article;
+use Sacfeed\DB\Section;
 
 class ArticleList extends Request {
 
@@ -15,21 +16,29 @@ class ArticleList extends Request {
 		$this->params = [
 			'n' => [ // number
 				'type' => 'int',
-				'default' => 100,
+				'default' => 12,
 				'min' => 1,
-				'max' => 100,
+				'max' => 12,
 				'required' => false
 			],
 			'a' => [ // after
-				'type' => 'string',
+				'type' => 'int',
 				'default' => null,
-				'regex' => '/^[a-z0-9\-\_]{' . Config::IDLEN . '}$/i',
+				'min' => 0,
+				'max' => 999999999,
 				'required' => false
 			],
 			's' => [ // since
+				'type' => 'int',
+				'default' => null,
+				'min' => 0,
+				'max' => 999999999,
+				'required' => false
+			],
+			'section' => [ // section id
 				'type' => 'string',
-				'default' => null, // all
-				'regex' => '/^[a-z0-9\-\_]{' . Config::IDLEN . '}$/i',
+				'default' => '/',
+				'regex' => '/^\/(?:[a-z0-9\-]+\/)*$/i',
 				'required' => false
 			]
 		];
@@ -41,10 +50,43 @@ class ArticleList extends Request {
 		}
 
 		if (isset($this->params['a']) && isset($this->params['s'])) {
-			$this->response->conflict('Cannot have both "a" and "s" parameters');
+			$this->response->conflict('Cannot have both "a" (after) and "s" (since) parameters');
 			return false;
 		}
 
+		$section = new Section();
+		if (!$section->findOne($this->params['section'])) {
+			$this->response->notFound('Section with id "' . $this->params['section'] . '" not found');
+			return false;
+		}
+
+		$find = ['section' => $this->params['section']];
+		if (isset($this->params['a'])) {
+			$article = new Article();
+			if (!$article->findOne($this->params['a'])) {
+				$this->response->notFound('Article with id "' . $this->params['a'] . '" not found');
+				return false;
+			}
+
+			$find['ts'] = ['$gt' => $article->ts];
+		} else if (isset($this->params['s'])) {
+			$article = new Article();
+			if (!$article->findOne($this->params['s'])) {
+				$this->response->notFound('Article with id "' . $this->params['s'] . '" not found');
+				return false;
+			}
+
+			$find['ts'] = ['$lt' => $article->ts];
+		}
+
+		$articles = [];
+		$cursor = Article::find($find)->sort(['ts' => -1])->limit($this->params['n']);
+		foreach ($cursor as $record) {
+			$article = new Article($record);
+			$articles[] = $article->getAPIFields();
+		}
+
+		$this->response->result['articles'] = $articles;
 		return true;
 	}
 }
