@@ -16,7 +16,7 @@ class Response {
 		403 => 'Forbidden', // unreachable request, authentication wont fix
 		404 => 'Not Found', // resource / action cannot be found
 		405 => 'Method Not Allowed', // method not allowed
-		406 => 'Not Acceptable', // format not allowed
+		406 => 'Not Acceptable', // format not allowed, invalid param value
 		409 => 'Conflict', // conflict with params
 		410 => 'Gone', // resource has been deleted
 		411 => 'Length Required', // length param is required
