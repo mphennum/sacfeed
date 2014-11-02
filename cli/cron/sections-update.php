@@ -3,6 +3,8 @@
 
 namespace Sacfeed;
 
+use MongoDate;
+
 use Sacfeed\DB\Section;
 
 require __DIR__ . '/../../sys/bootstrap.php';
@@ -48,6 +50,8 @@ if (empty($urls)) {
 
 $skip = ['/classifieds/' => true];
 
+$ts = new MongoDate();
+
 $seen = [];
 $sections = [];
 for ($i = 0, $n = count($urls); $i < $n; ++$i) {
@@ -77,6 +81,7 @@ for ($i = 0, $n = count($urls); $i < $n; ++$i) {
 	$section = new Section();
 	$section->_id = $id;
 	$section->name = $names[$i];
+	$section->ts = $ts;
 
 	CLI::message($section->_id . ': ', $section->name);
 

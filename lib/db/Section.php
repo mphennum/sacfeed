@@ -9,7 +9,8 @@ class Section extends Record {
 
 	public function __construct($fields = null) {
 		parent::__construct(self::COLLECTION, [
-			'name' => null
+			'name' => null,
+			'ts' => null
 		]);
 
 		if ($fields !== null) {
@@ -20,7 +21,8 @@ class Section extends Record {
 	public function getAPIFields() {
 		return [
 			'id' => $this->fields['_id'],
-			'name' => $this->fields['name']
+			'name' => $this->fields['name'],
+			'ts' => $this->fields['ts']->sec * 1000 + ($this->fields['ts']->usec / 1000),
 		];
 	}
 
