@@ -2,6 +2,8 @@
 
 namespace Sacfeed;
 
+use DateTime;
+
 class Request {
 	static public $map = [];
 
@@ -34,6 +36,12 @@ class Request {
 		if ($this->opts['method'] !== $this->method) {
 			$this->response->methodNotAllowed('Only "' . $this->method . '" method allowed for this request');
 			return false;
+		}
+
+		if ($this->method === 'POST') {
+			$this->response->created();
+		} else if ($this->method === 'PUT' || $this->method === 'DELETE') {
+			$this->response->accepted();
 		}
 
 		$params = $this->opts['params'];
@@ -94,31 +102,71 @@ class Request {
 
 	public function view() {
 		$opts = $this->opts;
-
 		$result = $this->response->result;
 		$status = $this->response->status;
 
-		$code = $status['code'];
-		if ($code === 200) {
-			$response = $result;
-		} else if ($code === 204) {
-			$response = null;
+		if ($opts['host'] === App::API) {
+			if ($status['code'] < 300) {
+				$empty = true;
+				foreach ($result as $resource) {
+					if (!is_array($resource) || !empty($resource)) {
+						$empty = false;
+						$response = $result;
+						break;
+					}
+				}
+
+				if ($empty) {
+					if ($this->method === 'GET') {
+						$this->response->noContent();
+						$status = $this->response->status;
+					}
+
+					$response = null;
+				}
+			} else {
+				$response = $status;
+				if ($status['code'] === 405) {
+					$headers[] = 'Allow: GET, HEAD';
+				} else if ($status['code'] === 301) {
+					$headers[] = 'Location: ' . $result['location'];
+				}
+			}
+		}
+
+		$now = new DateTime('now', App::$utc);
+		$format = 'D\, d M Y H:i:s';
+		$nowFormat = $now->format($format) . ' UTC';
+
+		http_response_code($status['code']);
+		$headers = [
+			//'Content-Language: en-us',
+			'Date: ' . $nowFormat
+		];
+
+		if ($this->response->ttl === 0) {
+			$headers[] = 'Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0';
+			$headers[] = 'Pragma: no-cache';
+			$headers[] = 'Expires: Mon, 1 Jan 1970 00:00:00 UTC';
 		} else {
-			$response = $status;
+			$duration = $this->response->ttl - 1;
+			$date = new DateTime('now', App::$utc);
+			$date->setTimestamp($now->getTimestamp() + $duration);
+
+			$headers[] = 'Last-Modified: ' . $nowFormat;
+			$headers[] = 'Cache-Control: public, max-age=' . $duration;
+			$headers[] = 'Pragma: cache';
+			$headers[] = 'Expires: ' . $date->format($format) . ' UTC';
+		}
+
+		foreach ($headers as $header) {
+			header($header);
 		}
 
 		ob_start('ob_gzhandler');
 		include __DIR__ . '/../tmpl/' . (($opts['host'] === App::API) ? 'api/' : 'www/') . $this->template . '.php';
 		$output = ob_get_contents();
-
-		/*if ($opts['host'] === App::WWW) {
-			$output .= '<pre>';
-			$output .= json_encode($response, JSON_PRETTY_PRINT) . "\n";
-			$output .= json_encode($opts, JSON_PRETTY_PRINT) . "\n";
-		} else {
-			$output .= json_encode($opts, JSON_PRETTY_PRINT) . "\n";
-		}*/
-
+		header('Content-Length: ' . strlen($output));
 		ob_end_clean();
 
 		return $output;
