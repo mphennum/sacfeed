@@ -165,8 +165,13 @@ class Request {
 
 		ob_start('ob_gzhandler');
 		include __DIR__ . '/../tmpl/' . (($opts['host'] === App::API) ? 'api/' : 'www/') . $this->template . '.php';
-		$output = ob_get_contents();
-		header('Content-Length: ' . strlen($output));
+		$output = trim(ob_get_contents());
+
+		if ($output !== '') {
+			$output .= "\n";
+			header('Content-Length: ' . strlen($output));
+		}
+
 		ob_end_clean();
 
 		return $output;
