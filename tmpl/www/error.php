@@ -9,7 +9,9 @@
 
 <body>
 
-<p>error</p>
+<p>Error</p>
+
+<pre><?= json_encode($status, JSON_PRETTY_PRINT) ?></pre>
 
 </body>
 
