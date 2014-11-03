@@ -9,20 +9,7 @@ use Sacfeed\DB\Section;
 
 require __DIR__ . '/../../sys/bootstrap.php';
 
-$opts = getopt('v', ['help']);
-
-if (isset($opts['help'])) {
-	CLI::message('Sacfeed -- update sections cli');
-	CLI::message('usage: ', 'sections-update.php [OPTIONS]');
-	CLI::message('-v     ', 'verbose');
-	exit(0);
-}
-
-if (isset($opts['v'])) {
-	CLI::$verbose = true;
-}
-
-CLI::title('Sacfeed -- update sections cli');
+CLI::init('Sacfeed -- update sections cli');
 
 $url = 'http://www.sacbee.com/';
 

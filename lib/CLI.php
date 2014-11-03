@@ -2,7 +2,15 @@
 
 namespace Sacfeed;
 
+use Exception;
+
 class CLI {
+	static public $opts = [];
+	static private $reserved = [
+		'help' => 'This help message',
+		'v' => 'verbose'
+	];
+
 	static public $verbose = false;
 	static public $usleep = 250000; // (micro seconds) sleep timer for title, subtitle, notice, warning, error
 
@@ -25,6 +33,82 @@ class CLI {
 		'light-grey' => "\033[0;37m",
 		'white' => "\033[1;37m"
 	];
+
+	static public function init($title, $opts = []) {
+		$short = '';
+		$long = [];
+		foreach ($opts as $opt => $message) {
+			$len = strlen($opt);
+			if ($len === 1 || ($len === 2 && $opt{1} === ':')) {
+				if (isset(self::$reserved[$opt{0}]) || isset(self::$reserved[$opt{0} . ':'])) {
+					throw new Exception('Cannot used reserved long CLI option "' . $opt . '"');
+				}
+
+				$short .= $opt;
+			} else {
+				if (isset(self::$reserved[$opt])) {
+					throw new Exception('Cannot used reserved long CLI option "' . $opt . '"');
+				}
+
+				$long[] = $opt;
+			}
+		}
+
+		foreach (self::$reserved as $reserved => $message) {
+			$len = strlen($reserved);
+			if ($len === 1 || ($len === 2 && $reserved{1} === ':')) {
+				$short .= $reserved;
+			} else {
+				$long[] = $reserved;
+			}
+		}
+
+		self::$opts = getopt($short, $long);
+
+		if (isset(self::$opts['help'])) {
+			$opts = array_merge(self::$reserved, $opts);
+			self::$verbose = true;
+
+			$file = explode('/', __FILE__);
+			$file = $file[count($file) - 1];
+
+			CLI::message($title);
+			CLI::message('   usage:  ', $file . ' [OPTIONS]');
+			foreach ($opts as $opt => $message) {
+				$len = strlen($opt);
+				if ($len === 1 || ($len === 2 && $opt{1} === ':')) {
+					CLI::message('       -' . $opt{0} . '  ', $message);
+				} else {
+					$spaces = '';
+					for ($i = 7 - strlen($opt); $i > 0; --$i) {
+						$spaces .= ' ';
+					}
+
+					CLI::message($spaces . '--' . $opt . '  ', $message);
+				}
+			}
+
+			exit(0);
+		}
+
+		if (isset(self::$opts['v'])) {
+			self::$verbose = true;
+		}
+
+		CLI::title($title);
+	}
+
+	static public function opt($key) {
+		if (isset(self::$opts[$key])) {
+			if (self::$opts[$key] === false) {
+				return true;
+			}
+
+			return self::$opts[$key];
+		}
+
+		return false;
+	}
 
 	static public function title($message) {
 		if (!self::$verbose) {
