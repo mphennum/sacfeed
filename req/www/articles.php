@@ -12,16 +12,14 @@ class Articles extends Request {
 		$sections = [];
 		$cursor = Section::find();
 		foreach ($cursor as $record) {
-			$section = new Section();
-			$section->setFields($record);
+			$section = new Section($record);
 			$sections[] = $section->getAPIFields();
 		}
 
 		$articles = [];
 		$cursor = Article::find(['section' => '/']);
 		foreach ($cursor as $record) {
-			$article = new Article();
-			$article->setFields($record);
+			$article = new Article($record);
 			$articles[] = $article->getAPIFields();
 		}
 
