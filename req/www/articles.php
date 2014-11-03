@@ -18,7 +18,7 @@ class Articles extends Request {
 		}
 
 		$articles = [];
-		$cursor = Article::find();
+		$cursor = Article::find(['section' => '/']);
 		foreach ($cursor as $record) {
 			$article = new Article();
 			$article->setFields($record);
