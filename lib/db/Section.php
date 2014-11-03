@@ -28,8 +28,13 @@ class Section extends Record {
 		];
 	}
 
-	public function updateTS($w = 0) {
-		Database::update(self::COLLECTION, ['_id' => $this->fields['_id']], ['$set' => ['ts' => new MongoDate()]], $w, false);
+	public function findOne($id) {
+		if (parent::findOne($id)) {
+			Database::update(self::COLLECTION, ['_id' => $this->fields['_id']], ['$set' => ['ts' => new MongoDate()]], 0, false);
+			return true;
+		}
+
+		return false;
 	}
 
 	static public function find($query = [], $projection = []) {
