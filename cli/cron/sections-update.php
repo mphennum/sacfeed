@@ -77,3 +77,5 @@ for ($i = 0, $n = count($urls); $i < $n; ++$i) {
 
 Database::remove(Section::COLLECTION, [], 1, true);
 Database::batchInsert(Section::COLLECTION, $sections);
+
+CLI::notice(count($sections) . ' sections inserted');
