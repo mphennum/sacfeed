@@ -105,7 +105,8 @@ class Request {
 		$result = $this->response->result;
 		$status = $this->response->status;
 
-		if ($opts['host'] === App::API) {
+		$api = ($opts['host'] === App::API);
+		if ($api) {
 			if ($status['code'] < 300) {
 				$empty = true;
 				foreach ($result as $resource) {
@@ -132,6 +133,8 @@ class Request {
 					$headers[] = 'Location: ' . $result['location'];
 				}
 			}
+		} else {
+			$response = $result;
 		}
 
 		$now = new DateTime('now', App::$utc);
@@ -164,9 +167,14 @@ class Request {
 		}
 
 		ob_start('ob_gzhandler');
-		include __DIR__ . '/../tmpl/' . (($opts['host'] === App::API) ? 'api/' : 'www/') . $this->template . '.php';
+		include __DIR__ . '/../tmpl/' . ($api ? 'api/' : 'www/') . $this->template . '.php';
 
 		$output = trim(ob_get_contents());
+		if (!Config::DEVMODE && !$api) {
+			$output = preg_replace('/^\s+/m', '', $output);
+			$output = preg_replace('/^\n+$/m', "\n", $output);
+		}
+
 		if ($output !== '') {
 			$output .= "\n";
 			header('Content-Length: ' . strlen($output));
