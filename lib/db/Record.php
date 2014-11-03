@@ -63,7 +63,7 @@ class Record {
 		}
 
 		foreach ($this->fields as $key => $value) {
-			if (!isset($seen[$key])) {
+			if (!array_key_exists($key, $seen)) {
 				throw new Exception('Missing field "' . $key . '" for setFields on collection "' . $this->collection . '"');
 			}
 		}
@@ -74,8 +74,13 @@ class Record {
 	// db commands
 
 	public function findOne($id) {
-		$this->fields = Database::findOne($this->collection, ['_id' => $id]);
-		return ($this->fields !== null);
+		$record = Database::findOne($this->collection, ['_id' => $id]);
+		if ($record === null) {
+			return false;
+		}
+
+		$this->fields = $record;
+		return true;
 	}
 
 	public function insert($w = 0) {
