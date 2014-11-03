@@ -13,10 +13,10 @@ require __DIR__ . '/../../sys/bootstrap.php';
 CLI::init('Sacfeed -- pull new articles cli');
 
 $ts = new MongoDate();
-$ts->sec -= 900;
+$ts->sec -= 60 * 15;
 
-$i = 0;
 $seen = [];
+$articles = [];
 $cursor = Section::find(['ts' => ['$gt' => $ts]], ['_id' => 1]);
 foreach ($cursor as $record) {
 	$section = $record['_id'];
@@ -50,11 +50,16 @@ foreach ($cursor as $record) {
 		}
 
 		$article->setJSONFields($section, $item);
-		$article->insert();
 
+		$articles[] = $article->getFields();
 		CLI::message($article->title);
-		++$i;
 	}
 }
 
-CLI::notice($i . ' articles inserted');
+$old = new MongoDate();
+$old->sec -= 60 * 60 * 24 * 7;
+Database::remove(Article::COLLECTION, ['ts' => ['$lt' => $old]], 0, true);
+Database::batchInsert(Article::COLLECTION, $articles);
+
+CLI::notice('Old articles (7 days) have been removed');
+CLI::notice(count($articles) . ' articles inserted');
