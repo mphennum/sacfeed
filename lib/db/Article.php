@@ -39,7 +39,15 @@ class Article extends Record {
 		];
 	}
 
+	public function setJSONFields($json) {
+
+	}
+
 	static public function find($query = [], $projection = []) {
+		if (isset($query['section'])) {
+			Section::requested($query['section']);
+		}
+
 		return Database::find(self::COLLECTION, $query, $projection);
 	}
 }
