@@ -24,7 +24,7 @@ class Section extends Record {
 		return [
 			'id' => $this->fields['_id'],
 			'name' => $this->fields['name'],
-			'ts' => $this->fields['ts']->sec * 1000 + ($this->fields['ts']->usec / 1000),
+			'ts' => $this->fields['ts']->sec * 1000 + ($this->fields['ts']->usec / 1000)
 		];
 	}
 
