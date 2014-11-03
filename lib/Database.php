@@ -2,6 +2,7 @@
 
 namespace Sacfeed;
 
+use Exception;
 use MongoClient;
 
 abstract class Database {
