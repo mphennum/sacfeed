@@ -12,7 +12,7 @@ class CLI {
 	];
 
 	static public $verbose = false;
-	static public $usleep = 250000; // (micro seconds) sleep timer for title, subtitle, notice, warning, error
+	static public $usleep = 100000; // (micro seconds) sleep timer for title, subtitle, notice, warning, error
 
 	static public $color = [
 		'reset' => "\033[0m",
