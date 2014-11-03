@@ -30,4 +30,4 @@ class Articles extends Request {
 	}
 }
 
-Request::$map[__FILE__] = 'Articles';
+Request::$requests[__FILE__] = 'Articles';

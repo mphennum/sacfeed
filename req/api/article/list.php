@@ -91,4 +91,4 @@ class ArticleList extends Request {
 	}
 }
 
-Request::$map[__FILE__] = 'ArticleList';
+Request::$requests[__FILE__] = 'ArticleList';

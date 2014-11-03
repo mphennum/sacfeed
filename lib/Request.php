@@ -5,7 +5,7 @@ namespace Sacfeed;
 use DateTime;
 
 class Request {
-	static public $map = [];
+	static public $requests = [];
 
 	// default actions
 	static public $actions = [
@@ -268,13 +268,13 @@ class Request {
 
 		$file = realpath(__DIR__ . '/../req/api/' . $opts['resource'] . '/' . $opts['action'] . '.php');
 
-		if (!isset(self::$map[$file]) && file_exists($file)) {
+		if (!isset(self::$requests[$file]) && file_exists($file)) {
 			require $file;
 		}
 
 		//exit((string) $opts['host']);
-		if (isset(self::$map[$file])) {
-			$class = 'Sacfeed\\API\\' . self::$map[$file];
+		if (isset(self::$requests[$file])) {
+			$class = 'Sacfeed\\API\\' . self::$requests[$file];
 			$request = new $class($opts);
 			$request->template = $opts['format'];
 			return $request;
@@ -305,12 +305,12 @@ class Request {
 		}
 
 		$file = realpath(__DIR__ . '/../req/www/' . $opts['resource'] . '.php');
-		if (!isset(self::$map[$file]) && file_exists($file)) {
+		if (!isset(self::$requests[$file]) && file_exists($file)) {
 			require $file;
 		}
 
-		if (isset(self::$map[$file])) {
-			$class = 'Sacfeed\\WWW\\' . self::$map[$file];
+		if (isset(self::$requests[$file])) {
+			$class = 'Sacfeed\\WWW\\' . self::$requests[$file];
 			$request = new $class($opts);
 			$request->template = 'article';
 			return $request;

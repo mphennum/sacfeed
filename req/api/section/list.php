@@ -31,4 +31,4 @@ class SectionList extends Request {
 	}
 }
 
-Request::$map[__FILE__] = 'SectionList';
+Request::$requests[__FILE__] = 'SectionList';
