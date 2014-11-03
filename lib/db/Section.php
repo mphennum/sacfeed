@@ -30,11 +30,15 @@ class Section extends Record {
 
 	public function findOne($id) {
 		if (parent::findOne($id)) {
-			Database::update(self::COLLECTION, ['_id' => $this->fields['_id']], ['$set' => ['ts' => new MongoDate()]], 0, false);
+			self::requested($id);
 			return true;
 		}
 
 		return false;
+	}
+
+	static public function requested($id) {
+		Database::update(self::COLLECTION, ['_id' => $id], ['$set' => ['ts' => new MongoDate()]], 0, false);
 	}
 
 	static public function find($query = [], $projection = []) {
