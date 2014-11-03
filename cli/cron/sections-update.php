@@ -65,17 +65,17 @@ for ($i = 0, $n = count($urls); $i < $n; ++$i) {
 
 	$seen[$id] = true;
 
-	$section = new Section();
-	$section->_id = $id;
-	$section->name = $names[$i];
-	$section->ts = $ts;
-
-	CLI::message($section->_id . ': ', $section->name);
+	$section = new Section([
+		'_id' => $id,
+		'name' => $names[$i],
+		'ts' => $ts
+	]);
 
 	$sections[] = $section->getFields();
+	CLI::message($section->_id . ': ', $section->name);
 }
 
 Database::remove(Section::COLLECTION, [], 1, true);
 Database::batchInsert(Section::COLLECTION, $sections);
 
-CLI::notice(count($sections) . ' sections inserted');
+CLI::notice(count($sections) . ' sections updated');
