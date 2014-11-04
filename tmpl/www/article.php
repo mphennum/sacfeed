@@ -15,7 +15,7 @@ header('Content-Type: text/html; charset=UTF-8');
 
 <? include(__DIR__ . '/ssi/meta.php'); ?>
 
-<title>live sacbee.com article feed - sacfeed</title>
+<title>sacbee article feed - sacfeed</title>
 
 <? include(__DIR__ . '/ssi/styles.php'); ?>
 
@@ -27,7 +27,7 @@ header('Content-Type: text/html; charset=UTF-8');
 
 <h1><a href="http://<?= Config::WWWHOST ?>/">sacfeed</a></h1>
 
-<button class="sf-nav"><hr><hr><hr></button>
+<button class="sf-navbtn"><hr><hr><hr></button>
 
 <nav>
 <?
