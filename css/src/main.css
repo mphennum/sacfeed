@@ -21,10 +21,28 @@
 /* outer */
 
 body {
-	background: #DDD;
+	background: #EEE;
 	color: #333;
 	font-family: "Roboto", Arial, Helvetica, sans-serif;
 	font-size: 12px;
+}
+
+/* header */
+
+header {
+	background: #004889;
+	box-shadow: 0 0 1px 2px #002849;
+	text-align: center;
+
+	margin-bottom: 5px;
+	padding: 5px 0 7px 0;
+	width: 100%;
+}
+
+header h1 a {
+	color: #FFF;
+	font-size: 20px;
+	text-decoration: none;
 }
 
 /* main */
@@ -32,7 +50,7 @@ body {
 article {
 	background: #FFF;
 	border-radius: 5px;
-	box-shadow: 0 0 1px 1px #CCC;
+	box-shadow: 0 0 1px 1px #DDD;
 
 	margin: 0 auto 5px auto;
 	padding: 5px;
@@ -43,4 +61,9 @@ article img {
 	border-radius: 5px;
 
 	width: 100%;
+}
+
+article h2 {
+	font-size: 16px;
+	font-weight: bold;
 }
