@@ -2,6 +2,9 @@
 
 namespace Sacfeed;
 
+use DateTime;
+use DateTimeZone;
+
 header('Content-Type: text/html; charset=UTF-8');
 
 ?>
@@ -20,28 +23,50 @@ header('Content-Type: text/html; charset=UTF-8');
 
 <body>
 
-<header><a href="http://<?= Config::WWWHOST ?>/">sacfeed</a></header>
+<header>
+
+<h1><a href="http://<?= Config::WWWHOST ?>/">sacfeed</a></h1>
+
+<button class="sf-nav"><hr><hr><hr></button>
 
 <nav>
 <?
 foreach ($response['sections'] as $section) {
-	echo '<a href="http://', Config::WWWHOST, $section['id'], '">', $section['name'], '</a>';
+	echo '<a href="http://', Config::WWWHOST, $section['id'], '">', $section['name'], '</a>', "\n";
 }
 ?>
 </nav>
 
+</header>
+
 <main>
 <?
+$pst = new DateTimeZone('America/Los_Angeles');
+$today = new DateTime('today', $pst);
+$today = $today->getTimestamp();
+
 foreach ($response['articles'] as $article) {
 	echo '<article>';
 	if ($article['thumb']) {
 		echo '<img src="', $article['thumb'], '" alt="', $article['thumb'], '">';
 	}
 
-	echo '<h2>', $article['title'], '</h2>';
-	echo '<p>', $article['author'], '</p>';
-	echo '<p>', $article['summary'], '</p>';
-	echo '</article>', "\n";
+	$dt = new DateTime('@' . $article['ts'] / 1000, App::$utc);
+	$dt->setTimezone($pst);
+
+	if ($dt->getTimestamp() > $today) {
+		$date = $dt->format('g:i a');
+	} else {
+		$date = $dt->format('l, F j');
+	}
+
+	echo
+		'<h2>', $article['title'], '</h2>',
+		'<p>', $article['summary'], '</p>',
+		'<p>', $article['author'], '</p>',
+		'<p>', $date, '</p>',
+		'</article>', "\n"
+	;
 }
 ?>
 </main>
