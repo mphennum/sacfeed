@@ -13,7 +13,7 @@ require __DIR__ . '/../../sys/bootstrap.php';
 CLI::init('Sacfeed -- pull new articles cli');
 
 $ts = new MongoDate();
-$ts->sec -= 60 * 15;
+$ts->sec -= 60 * 60 * 3;
 
 $seen = [];
 $articles = [];
