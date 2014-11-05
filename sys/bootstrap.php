@@ -11,6 +11,7 @@ require __DIR__ . '/../lib/Response.php';
 
 require __DIR__ . '/../lib/db/Record.php';
 require __DIR__ . '/../lib/db/Article.php';
+require __DIR__ . '/../lib/db/Author.php';
 require __DIR__ . '/../lib/db/Section.php';
 
 if (PHP_SAPI === 'cli') {
