@@ -20,8 +20,8 @@ class Author extends Record {
 
 	public function getAPIFields() {
 		return [
-			'names' => $this->fields['section'],
-			'image' => $this->fields['title']
+			'names' => $this->fields['names'],
+			'image' => $this->fields['image']
 		];
 	}
 
