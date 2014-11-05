@@ -46,25 +46,39 @@ $today = new DateTime('today', $pst);
 $today = $today->getTimestamp();
 
 foreach ($response['articles'] as $article) {
-	echo '<article>';
+	echo
+		'<article>', "\n",
+		'<div class="sf-top">', "\n"
+	;
+
 	if ($article['thumb']) {
-		echo '<img src="', $article['thumb'], '" alt="', $article['thumb'], '">';
+		echo '<p><a href="', $article['url'], '"><img src="', $article['thumb'], '" alt="', $article['thumb'], '"></a></p>', "\n";
 	}
 
-	$dt = new DateTime('@' . $article['ts'] / 1000, App::$utc);
+	$dt = new DateTime('@' . ($article['ts'] / 1000), App::$utc);
 	$dt->setTimezone($pst);
 
 	if ($dt->getTimestamp() > $today) {
-		$date = $dt->format('g:i a');
+		$date = $dt->format('g:i A');
 	} else {
 		$date = $dt->format('l, F j');
 	}
 
+	$author = preg_replace('/^By\s+/', '', $article['author']);
+	if (preg_match('/\s+([^@\s]+@[^@\s]+)$/', $author, $m)) {
+		$author = '<span class="sf-name">' . preg_replace('/\s+[^@\s]+@[^@\s]+$/', '', $author) . '</span> ' . $m[1];
+	} else {
+		$author = '<span class="sf-name">' . preg_replace('/^the\s/', 'The ', $author) . '</span>';
+	}
+
 	echo
-		'<h2>', $article['title'], '</h2>',
-		'<p>', $article['summary'], '</p>',
-		'<p>', $article['author'], '</p>',
-		'<p>', $date, '</p>',
+		'<h2><a href="', $article['url'], '">', $article['title'], '</a></h2>', "\n",
+		'<p class="sf-summary">', $article['summary'], '</p>', "\n",
+		'</div>', "\n",
+		'<div class="sf-bottom">', "\n",
+		'<p>', $author, '</p>', "\n",
+		'<p>', $date, '</p>', "\n",
+		'</div>', "\n",
 		'</article>', "\n"
 	;
 }

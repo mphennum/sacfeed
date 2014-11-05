@@ -29,6 +29,16 @@ body {
 	padding-top: 42px;
 }
 
+a {
+	color: #428BCA;
+	text-decoration: none;
+}
+
+a:hover, a:active {
+	color: #0D76BA;
+	text-decoration: underline;
+}
+
 /* header */
 
 header {
@@ -48,6 +58,10 @@ header {
 header h1 a {
 	color: #FFF;
 	font-size: 20px;
+}
+
+header h1 a:hover {
+	color: #FFF;
 	text-decoration: none;
 }
 
@@ -67,12 +81,21 @@ nav {
 
 article {
 	background: #FFF;
-	border-radius: 5px;
-	box-shadow: 0 0 1px 1px #DDD;
+	border-radius: 3px;
+	box-shadow: 0 0 1px 1px #D8D8D8;
 
 	margin: 0 auto 5px auto;
+	width: 100%;
+	max-width: 500px;
+}
+
+article .sf-top {
+	background: #FFF;
+	border-top-left-radius: 3px;
+	border-top-right-radius: 3px;
+	color: #333;
+
 	padding: 5px;
-	width: 500px;
 }
 
 article img {
@@ -81,7 +104,27 @@ article img {
 	width: 100%;
 }
 
-article h2 {
+article h2 a {
+	color: #333;
 	font-size: 16px;
 	font-weight: bold;
 }
+
+article .sf-bottom {
+	background: #F8F8F8;
+	border-top: 1px solid #E0E0E0;
+	border-bottom-left-radius: 3px;
+	border-bottom-right-radius: 3px;
+	color: #999;
+
+	padding: 5px;
+}
+
+article .sf-name {
+	color: #555;
+	font-weight: bold;
+}
+
+/*  responsive */
+
+

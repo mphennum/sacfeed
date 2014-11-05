@@ -17,7 +17,7 @@ class Articles extends Request {
 		}
 
 		$articles = [];
-		$cursor = Article::find(['section' => '/'])->limit(10);
+		$cursor = Article::find(['section' => '/'])->limit(12);
 		foreach ($cursor as $record) {
 			$article = new Article($record);
 			$articles[] = $article->getAPIFields();
