@@ -4,6 +4,7 @@ namespace Sacfeed\WWW;
 
 use Sacfeed\Request;
 use Sacfeed\DB\Article;
+use Sacfeed\DB\Author;
 use Sacfeed\DB\Section;
 
 class Articles extends Request {
@@ -23,8 +24,21 @@ class Articles extends Request {
 			$articles[] = $article->getAPIFields();
 		}
 
-		$this->response->result['articles'] = $articles;
+		$authorMap = [];
+		$cursor = Author::find();
+		foreach ($cursor as $record) {
+			$author = new Author($record);
+			foreach ($author->names as $name) {
+				$name = strtolower($name);
+				$name = str_replace(' ', '-', $name);
+				$name = preg_replace('/[^a-z\-]/', '', $name);
+				$authorMap[$name] = $author->_id;
+			}
+		}
+
 		$this->response->result['sections'] = $sections;
+		$this->response->result['articles'] = $articles;
+		$this->response->result['authorMap'] = $authorMap;
 	}
 }
 
