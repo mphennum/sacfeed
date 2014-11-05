@@ -9,8 +9,7 @@ class Author extends Record {
 
 	public function __construct($fields = null) {
 		parent::__construct(self::COLLECTION, [
-			'names' => [],
-			'image' => null
+			'names' => []
 		]);
 
 		if ($fields !== null) {
@@ -20,8 +19,8 @@ class Author extends Record {
 
 	public function getAPIFields() {
 		return [
-			'names' => $this->fields['names'],
-			'image' => $this->fields['image']
+			'id' => $this->fields['_id'],
+			'names' => $this->fields['names']
 		];
 	}
 
