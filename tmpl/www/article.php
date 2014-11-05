@@ -40,21 +40,13 @@ foreach ($response['sections'] as $section) {
 </header>
 
 <main>
+
 <?
 $pst = new DateTimeZone('America/Los_Angeles');
 $today = new DateTime('today', $pst);
 $today = $today->getTimestamp();
 
 foreach ($response['articles'] as $article) {
-	echo
-		'<article>', "\n",
-		'<div class="sf-top">', "\n"
-	;
-
-	if ($article['thumb']) {
-		echo '<p><a href="', $article['url'], '"><img src="', $article['thumb'], '" alt="', $article['thumb'], '"></a></p>', "\n";
-	}
-
 	$dt = new DateTime('@' . ($article['ts'] / 1000), App::$utc);
 	$dt->setTimezone($pst);
 
@@ -62,6 +54,12 @@ foreach ($response['articles'] as $article) {
 		$date = $dt->format('g:i A');
 	} else {
 		$date = $dt->format('l, F j');
+	}
+
+	if ($article['thumb']) {
+		$thumb = '<p><a href="' . $article['url'] . '"><img src="' . $article['thumb'] . '" alt="' . str_replace('"', '\'', $article['title']) . '"></a></p>' . "\n";
+	} else {
+		$thumb = '';
 	}
 
 	$author = preg_replace('/^By\s+/', '', $article['author']);
@@ -72,14 +70,21 @@ foreach ($response['articles'] as $article) {
 	}
 
 	echo
+		'<article>', "\n",
+		'<div class="sf-top">', "\n",
+		$thumb
+	;
+
+	echo
 		'<h2><a href="', $article['url'], '">', $article['title'], '</a></h2>', "\n",
 		'<p class="sf-summary">', $article['summary'], '</p>', "\n",
+		'<p><a href="', $article['url'], '">read more</a></p>', "\n",
 		'</div>', "\n",
 		'<div class="sf-bottom">', "\n",
 		'<p>', $author, '</p>', "\n",
 		'<p>', $date, '</p>', "\n",
 		'</div>', "\n",
-		'</article>', "\n"
+		'</article>', "\n\n"
 	;
 }
 ?>
