@@ -5,6 +5,8 @@ namespace Sacfeed;
 use DateTime;
 use DateTimeZone;
 
+use Sacfeed\DB\Author;
+
 header('Content-Type: text/html; charset=UTF-8');
 
 ?>
@@ -42,6 +44,9 @@ foreach ($response['sections'] as $section) {
 <main>
 
 <?
+
+$authorMap = $response['authorMap'];
+
 $pst = new DateTimeZone('America/Los_Angeles');
 $today = new DateTime('today', $pst);
 $today = $today->getTimestamp();
@@ -57,14 +62,22 @@ foreach ($response['articles'] as $article) {
 	}
 
 	if ($article['thumb']) {
-		$thumb = '<p><a href="' . $article['url'] . '"><img src="' . $article['thumb'] . '" alt="' . str_replace('"', '\'', $article['title']) . '"></a></p>' . "\n";
+		$thumb = '<p class="sf-thumb"><a href="' . $article['url'] . '"><img src="' . $article['thumb'] . '" alt="' . str_replace('"', '\'', $article['title']) . '"></a></p>' . "\n";
 	} else {
 		$thumb = '';
 	}
 
+	$profile = '';
 	$author = preg_replace('/^By\s+/', '', $article['author']);
 	if (preg_match('/\s+([^@\s]+@[^@\s]+)$/', $author, $m)) {
-		$author = '<span class="sf-name">' . preg_replace('/\s+[^@\s]+@[^@\s]+$/', '', $author) . '</span> ' . $m[1];
+		$author = preg_replace('/\s+[^@\s]+@[^@\s]+$/', '', $author);
+		$authorLC = strtolower($author);
+		if (isset($authorMap[$authorLC])) {
+			$file = 'http://' . Config::IMGHOST . Config::AUTHORDIR . str_replace(' ', '-', $authorLC) . '.jpg';
+			$profile = '<img class="sf-profile" src="' . $file . '" alt="' . $author . '">';
+		}
+
+		$author = '<span class="sf-name">' . $author . '</span> ' . $m[1];
 	} else {
 		$author = '<span class="sf-name">' . preg_replace('/^the\s/', 'The ', $author) . '</span>';
 	}
@@ -81,8 +94,9 @@ foreach ($response['articles'] as $article) {
 		'<p><a href="', $article['url'], '">read more</a></p>', "\n",
 		'</div>', "\n",
 		'<div class="sf-bottom">', "\n",
+		$profile,
 		'<p>', $author, '</p>', "\n",
-		'<p>', $date, '</p>', "\n",
+		'<p class="sf-date">', $date, '</p>', "\n",
 		'</div>', "\n",
 		'</article>', "\n\n"
 	;
