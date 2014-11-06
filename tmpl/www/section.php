@@ -79,8 +79,8 @@ foreach ($response['articles'] as $article) {
 		$author = 'Dan ' . $m[1] . ' d' . strtolower($m[1]) . '@sacbee.com';
 	}
 
-	if (preg_match('/\s+([^@\s]+@[^@\s]+)$/', $author, $m)) {
-		$author = preg_replace('/\s+[^@\s]+@[^@\s]+$/', '', $author);
+	if (preg_match('/\s+([^@\s]+@[^@\s]+|the\s*sacramento\s*bee)$/i', $author, $m)) {
+		$author = preg_replace('/\s+(?:[^@\s]+@[^@\s]+|the\s*sacramento\s*bee)$/i', '', $author);
 		$authorLC = strtolower($author);
 		if (isset($authorMap[$authorLC])) {
 			$file = 'http://' . Config::IMGHOST . Config::AUTHORDIR . str_replace(' ', '-', $authorLC) . '.jpg';

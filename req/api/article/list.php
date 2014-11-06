@@ -53,13 +53,19 @@ class APIArticleList extends Request {
 			return false;
 		}
 
-		$section = new Section();
-		if (!$section->findOne($this->params['section'])) {
-			$this->response->notFound('Section with id "' . $this->params['section'] . '" not found');
-			return false;
+		$sectionID = $this->params['section'];
+		if ($sectionID === '/news/') {
+			$find = [];
+		} else {
+			$section = new Section();
+			if (!$section->findOne($sectionID)) {
+				$this->response->notFound('Section with id "' . $sectionID . '" not found');
+				return false;
+			}
+
+			$find = ['section' => $sectionID];
 		}
 
-		$find = ['section' => $this->params['section']];
 		if (isset($this->params['a'])) {
 			$article = new Article();
 			if (!$article->findOne($this->params['a'])) {

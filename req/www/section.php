@@ -14,17 +14,11 @@ class WWWSection extends Request {
 
 		$this->method = 'GET';
 		$this->params = [
-			'section' => [
+			'section' => [ // section id
 				'type' => 'string',
 				'default' => '/',
-				'regex' => '/^(\/[a-z\-]+)*\/$/',
+				'regex' => '/^\/(?:[a-z0-9\-]+\/)*$/',
 				'required' => true
-			],
-			'article' => [
-				'type' => 'string',
-				'default' => null,
-				'regex' => '/^[a-z0-9]+(\-[a-z0-9]+)*$/',
-				'required' => false
 			]
 		];
 	}
@@ -56,7 +50,7 @@ class WWWSection extends Request {
 		}
 
 		$articles = [];
-		$cursor = Article::find($find)->limit(12);
+		$cursor = Article::find($find)->sort(['ts' => -1])->limit(12);
 		foreach ($cursor as $record) {
 			$article = new Article($record);
 			$articles[] = $article->getAPIFields();
