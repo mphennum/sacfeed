@@ -1,97 +1,9 @@
-/* reset */
-
-* {
-	background: transparent;
-	border: none;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-	box-sizing: border-box;
-	font-family: "Roboto", Arial, Helvetica, sans-serif;
-	font-size: 100%;
-	font-weight: 400;
-	line-height: 1.2em;
-	outline: none;
-	vertical-align: baseline;
-
-	margin: 0;
-	padding: 0;
-	z-index: 1;
-}
-
-/* outer */
-
-body {
-	background: #EEE;
-	color: #333;
-	font-family: "Roboto", Arial, Helvetica, sans-serif;
-	font-size: 12px;
-
-	padding: 42px 5px 0 5px;
-}
-
-a {
-	color: #428BCA;
-	text-decoration: none;
-}
-
-a:hover, a:active {
-	color: #0D76BA;
-	text-decoration: underline;
-}
-
-/* header */
-
-header {
-	background: #004889;
-	box-shadow: 0 0 1px 1px #012;
-	text-align: center;
-
-	padding: 5px 0 7px 0;
-	width: 100%;
-	position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
-}
-
-header h1 a {
-	color: #FFF;
-	font-size: 20px;
-}
-
-header h1 a:hover {
-	color: #FFF;
-	text-decoration: none;
-}
-
-/* nav */
-
-.sf-navbtn {
-	display: block;
-
-	width: 40px;
-	position: absolute;
-}
-
-.sf-navbtn hr {
-	background: #FFF;
-
-	width: 100%;
-	height: 2px;
-}
-
-nav {
-	display: none;
-
-	position: absolute;
-}
-
 /* main */
 
 article {
 	background: #FFF;
 	border-radius: 3px;
-	box-shadow: 0 0 1px 1px #D8D8D8;
+	box-shadow: 0 0 1px 1px #CCC;
 
 	margin: 0 auto 5px auto;
 	width: 100%;
@@ -121,8 +33,8 @@ article h2 a {
 }
 
 article .sf-bottom {
-	background: #F8F8F8;
-	border-top: 1px solid #E0E0E0;
+	background: #EEE;
+	border-top: 1px solid #DDD;
 	border-bottom-left-radius: 3px;
 	border-bottom-right-radius: 3px;
 	color: #999;

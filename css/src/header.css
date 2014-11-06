@@ -1,0 +1,31 @@
+/* header */
+
+header {
+	background: #004889;
+	box-shadow: 0 0 1px 1px #012;
+	text-align: center;
+
+	padding: 5px 0 7px 0;
+	width: 100%;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+}
+
+header .sf-wrapper {
+	margin: 0 auto;
+	width: 100%;
+	max-width: 350px;
+	position: relative;
+}
+
+header h1 a {
+	color: #FFF;
+	font-size: 20px;
+}
+
+header h1 a:hover {
+	color: #FFF;
+	text-decoration: none;
+}
