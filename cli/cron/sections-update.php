@@ -19,7 +19,7 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 $html = curl_exec($ch);
 $info = curl_getinfo($ch);
 
-if ($html === false || trim($html) === '') {
+if ($html === false || trim($html) === '' || $info['http_code'] !== 200) {
 	CLI::error('curl failed: ' . $url);
 }
 

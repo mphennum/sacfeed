@@ -15,8 +15,8 @@ CLI::init('Sacfeed -- pull new articles cli');
 $ts = new MongoDate();
 $ts->sec -= 60 * 60 * 3;
 
+$n = 0;
 $seen = [];
-$articles = [];
 $cursor = Section::find(['ts' => ['$gt' => $ts]], ['_id' => 1]);
 foreach ($cursor as $record) {
 	$section = $record['_id'];
@@ -28,7 +28,7 @@ foreach ($cursor as $record) {
 	$json = curl_exec($ch);
 	$info = curl_getinfo($ch);
 
-	if ($json === false || trim($json) === '') {
+	if ($json === false || trim($json) === '' || $info['http_code'] !== 200) {
 		CLI::error('curl failed: ' . $url);
 	}
 
@@ -50,8 +50,9 @@ foreach ($cursor as $record) {
 		}
 
 		$article->setJSONFields($section, $item);
+		$article->insert(1);
 
-		$articles[] = $article->getFields();
+		++$n;
 		CLI::message($article->title);
 	}
 }
@@ -59,7 +60,6 @@ foreach ($cursor as $record) {
 $old = new MongoDate();
 $old->sec -= 60 * 60 * 24 * 7;
 Database::remove(Article::COLLECTION, ['ts' => ['$lt' => $old]], 0, true);
-Database::batchInsert(Article::COLLECTION, $articles);
 
 CLI::notice('Old articles (7 days) have been removed');
-CLI::notice(count($articles) . ' articles inserted');
+CLI::notice($n . ' articles inserted');
