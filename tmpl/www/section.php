@@ -75,10 +75,8 @@ foreach ($response['articles'] as $article) {
 	$author = preg_replace('/^By\s+/', '', $article['author']);
 	$author = trim($author);
 
-	if ($author === '') {
-		if (preg_match('/Dan\s+(Walters|Morain)/i', $article['title'], $m)) {
-			$author = 'Dan ' . $m[1] . ' d' . strtolower($m[1]) . '@sacbee.com';
-		}
+	if ($author === '' && preg_match('/Dan\s+(Walters|Morain)/i', $article['title'], $m)) {
+		$author = 'Dan ' . $m[1] . ' d' . strtolower($m[1]) . '@sacbee.com';
 	}
 
 	if (preg_match('/\s+([^@\s]+@[^@\s]+)$/', $author, $m)) {
