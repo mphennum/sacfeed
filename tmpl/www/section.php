@@ -85,11 +85,14 @@ foreach ($response['articles'] as $article) {
 		if (isset($authorMap[$authorLC])) {
 			$file = 'http://' . Config::IMGHOST . Config::AUTHORDIR . str_replace(' ', '-', $authorLC) . '.jpg';
 			$profile = '<img class="sf-profile" src="' . $file . '" alt="' . $author . '">';
+		} else if (preg_match('/^([^,]+),/', $author, $first) && isset($authorMap[strtolower($first[1])])) {
+			$file = 'http://' . Config::IMGHOST . Config::AUTHORDIR . str_replace(' ', '-', strtolower($first[1])) . '.jpg';
+			$profile = '<img class="sf-profile" src="' . $file . '" alt="' . $author . '">';
 		}
 
-		$author = '<p><span class="sf-name">' . $author . '</span> ' . $m[1] . '</p>';
+		$author = '<p class="sf-byline"><span class="sf-name">' . $author . '</span> ' . $m[1] . '</p>';
 	} else if ($author !== '') {
-		$author = '<p><span class="sf-name">' . preg_replace('/^the\s/', 'The ', $author) . '</span></p>';
+		$author = '<p class="sf-byline"><span class="sf-name">' . preg_replace('/^the\s/', 'The ', $author) . '</span></p>';
 	}
 
 	echo
