@@ -34,11 +34,18 @@ class WWWSection extends Request {
 			return false;
 		}
 
-		$section = new Section();
-		if (!$section->findOne($this->params['section'])) {
-			$this->template = 'error';
-			$this->response->notFound();
-			return false;
+		$sectionID = $this->params['section'];
+		if ($sectionID === '/news/') {
+			$find = [];
+		} else {
+			$section = new Section();
+			if (!$section->findOne($sectionID)) {
+				$this->template = 'error';
+				$this->response->notFound();
+				return false;
+			}
+
+			$find = ['section' => $sectionID];
 		}
 
 		$sections = [];
@@ -49,7 +56,7 @@ class WWWSection extends Request {
 		}
 
 		$articles = [];
-		$cursor = Article::find(['section' => $this->params['section']])->limit(12);
+		$cursor = Article::find($find)->limit(12);
 		foreach ($cursor as $record) {
 			$article = new Article($record);
 			$articles[] = $article->getAPIFields();
