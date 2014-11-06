@@ -295,8 +295,7 @@ class Request {
 	}
 
 	static private function wwwFactory($opts = []) {
-		$opts['format'] = isset($opts['format']) ? $opts['format'] : 'html';
-		$opts['resource'] = ($opts['resource'] === '') ? 'articles' : $opts['resource'];
+		$opts['format'] = isset($opts['format']) ? $opts['format'] : null;
 
 		if ($opts['action'] !== 'read') {
 			$request = new Request($opts);
@@ -305,22 +304,36 @@ class Request {
 			return $request;
 		}
 
-		if ($opts['format'] !== 'html') {
+		if ($opts['format'] !== null) {
 			$request = new Request($opts);
 			$request->template = 'error';
-			$request->response->notAcceptable('Format not supported.');
+			$request->response->notFound();
 			return $request;
 		}
 
-		$file = realpath(__DIR__ . '/../req/www/' . $opts['resource'] . '.php');
+		if (!empty($opts['params'])) {
+			$request = new Request($opts);
+			$request->template = 'error';
+			$request->response->notFound();
+			return $request;
+		}
+
+		$file = realpath(__DIR__ . '/../req/www/section.php');
 		if (!isset(self::$requests[$file]) && file_exists($file)) {
 			require $file;
 		}
 
 		if (isset(self::$requests[$file])) {
 			$class = 'Sacfeed\\WWW\\' . self::$requests[$file];
+			if ($opts['resource'] === '/' || $opts['resource'] === '') {
+				$resource = '/';
+			} else {
+				$resource = '/' . $opts['resource'] . '/';
+			}
+
+			$opts['params'] = ['section' => $resource];
 			$request = new $class($opts);
-			$request->template = 'article';
+			$request->template = 'section';
 			return $request;
 		}
 

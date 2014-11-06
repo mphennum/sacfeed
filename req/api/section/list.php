@@ -5,7 +5,7 @@ namespace Sacfeed\API;
 use Sacfeed\Request;
 use Sacfeed\DB\Section;
 
-class SectionList extends Request {
+class APISectionList extends Request {
 
 	public function __construct($opts = []) {
 		parent::__construct($opts);
@@ -31,4 +31,4 @@ class SectionList extends Request {
 	}
 }
 
-Request::$requests[__FILE__] = 'SectionList';
+Request::$requests[__FILE__] = 'APISectionList';

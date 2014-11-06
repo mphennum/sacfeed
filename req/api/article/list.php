@@ -7,7 +7,7 @@ use Sacfeed\Request;
 use Sacfeed\DB\Article;
 use Sacfeed\DB\Section;
 
-class ArticleList extends Request {
+class APIArticleList extends Request {
 
 	public function __construct($opts = []) {
 		parent::__construct($opts);
@@ -37,9 +37,8 @@ class ArticleList extends Request {
 			],
 			'section' => [ // section id
 				'type' => 'string',
-				'default' => '/',
 				'regex' => '/^\/(?:[a-z0-9\-]+\/)*$/i',
-				'required' => false
+				'required' => true
 			]
 		];
 	}
@@ -91,4 +90,4 @@ class ArticleList extends Request {
 	}
 }
 
-Request::$requests[__FILE__] = 'ArticleList';
+Request::$requests[__FILE__] = 'APIArticleList';
