@@ -29,10 +29,7 @@ class Articles extends Request {
 		foreach ($cursor as $record) {
 			$author = new Author($record);
 			foreach ($author->names as $name) {
-				$name = strtolower($name);
-				$name = str_replace(' ', '-', $name);
-				$name = preg_replace('/[^a-z\-]/', '', $name);
-				$authorMap[$name] = $author->_id;
+				$authorMap[strtolower($name)] = $author->_id;
 			}
 		}
 

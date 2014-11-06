@@ -73,6 +73,25 @@ class Article extends Record {
 				$this->fields['thumb'] = $photo['url'];
 			}
 		}
+
+
+		if ($this->fields['thumb'] !== null) {
+			$url = preg_replace('/\/FREE_[0-9]+\//', '/LANDSCAPE_560/', $this->fields['thumb']);
+
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, $url);
+			curl_setopt($ch, CURLOPT_NOBODY, true);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+			curl_setopt($ch, CURLOPT_MAXREDIRS, 5);
+			$header = curl_exec($ch);
+			$info = curl_getinfo($ch);
+			curl_close($ch);
+
+			if ($header !== false && $info['http_code'] > 199 && $info['http_code'] < 300) {
+				$this->fields['thumb'] = $url;
+			}
+		}
 	}
 
 	static public function find($query = [], $projection = []) {
