@@ -37,8 +37,8 @@ class Section extends Record {
 		return false;
 	}
 
-	static public function requested($id) {
-		Database::update(self::COLLECTION, ['_id' => $id], ['$set' => ['ts' => new MongoDate()]], 0, false);
+	static public function requested($id = null) {
+		Database::update(self::COLLECTION, ($id === null) ? [] : ['_id' => $id], ['$set' => ['ts' => new MongoDate()]], 0, true);
 	}
 
 	static public function find($query = [], $projection = []) {

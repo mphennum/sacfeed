@@ -95,10 +95,7 @@ class Article extends Record {
 	}
 
 	static public function find($query = [], $projection = []) {
-		if (isset($query['section'])) {
-			Section::requested($query['section']);
-		}
-
+		Section::requested(isset($query['section']) ? $query['section'] : null);
 		return Database::find(self::COLLECTION, $query, $projection);
 	}
 }
