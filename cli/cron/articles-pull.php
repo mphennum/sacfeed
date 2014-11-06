@@ -15,6 +15,9 @@ CLI::init('Sacfeed -- pull new articles cli');
 $ts = new MongoDate();
 $ts->sec -= 60 * 60 * 3;
 
+$old = new MongoDate();
+$old->sec -= 60 * 60 * 24 * 7;
+
 $n = 0;
 $seen = [];
 $cursor = Section::find(['ts' => ['$gt' => $ts]], ['_id' => 1]);
@@ -50,6 +53,11 @@ foreach ($cursor as $record) {
 		}
 
 		$article->setJSONFields($section, $item);
+
+		if ($article->ts->sec < $old->sec) {
+			continue;
+		}
+
 		$article->insert(1);
 
 		++$n;
@@ -57,8 +65,6 @@ foreach ($cursor as $record) {
 	}
 }
 
-$old = new MongoDate();
-$old->sec -= 60 * 60 * 24 * 7;
 Database::remove(Article::COLLECTION, ['ts' => ['$lt' => $old]], 0, true);
 
 CLI::notice('Old articles (7 days) have been removed');
