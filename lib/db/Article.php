@@ -76,7 +76,7 @@ class Article extends Record {
 
 
 		if ($this->fields['thumb'] !== null) {
-			$url = preg_replace('/\/FREE_[0-9]+\//', '/LANDSCAPE_560/', $this->fields['thumb']);
+			$url = preg_replace('/\/FREE_[0-9]+\//', '/LANDSCAPE_320/', $this->fields['thumb']);
 
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $url);
