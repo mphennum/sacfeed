@@ -24,6 +24,15 @@ class Author extends Record {
 		];
 	}
 
+	static public function cleanID($id) {
+		$id = preg_replace('/\..*$/', '', $id);
+		$id = strtolower($id);
+		$id = str_replace(' ' , '-', $id);
+		$id = preg_replace('/[^a-z\-]/', '', $id);
+		$id = preg_replace('/\-+/', '-', $id);
+		return $id;
+	}
+
 	static public function find($query = [], $projection = []) {
 		return Database::find(self::COLLECTION, $query, $projection);
 	}
