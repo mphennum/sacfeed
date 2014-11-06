@@ -83,10 +83,10 @@ foreach ($response['articles'] as $article) {
 		$author = preg_replace('/\s+(?:[^@\s]+@[^@\s]+|the\s*sacramento\s*bee)$/i', '', $author);
 		$authorLC = strtolower($author);
 		if (isset($authorMap[$authorLC])) {
-			$file = 'http://' . Config::IMGHOST . Config::AUTHORDIR . str_replace(' ', '-', $authorLC) . '.jpg';
+			$file = 'http://' . Config::IMGHOST . Config::AUTHORDIR . $authorMap[$authorLC] . '.jpg';
 			$profile = '<img class="sf-profile" src="' . $file . '" alt="' . $author . '">';
 		} else if (preg_match('/^([^,]+),/', $author, $first) && isset($authorMap[strtolower($first[1])])) {
-			$file = 'http://' . Config::IMGHOST . Config::AUTHORDIR . str_replace(' ', '-', strtolower($first[1])) . '.jpg';
+			$file = 'http://' . Config::IMGHOST . Config::AUTHORDIR . $authorMap[strtolower($first[1])] . '.jpg';
 			$profile = '<img class="sf-profile" src="' . $file . '" alt="' . $author . '">';
 		}
 
