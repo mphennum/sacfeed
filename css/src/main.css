@@ -131,11 +131,15 @@ article .sf-profile {
 	height: 40px;
 }
 
+article .sf-byline {
+	margin-bottom: 10px;
+}
+
 article .sf-name {
 	color: #555;
 	font-weight: bold;
 }
 
 article .sf-date {
-	margin-top: 13px;
+	margin-bottom: 3px;
 }
