@@ -45,6 +45,7 @@ foreach ($response['sections'] as $section) {
 
 <?
 
+$titleMap = $response['titleMap'];
 $authorMap = $response['authorMap'];
 
 $pst = new DateTimeZone('America/Los_Angeles');
@@ -73,10 +74,18 @@ foreach ($response['articles'] as $article) {
 
 	$profile = '';
 	$author = preg_replace('/^By\s+/', '', $article['author']);
+	$author = preg_replace('/^(.*)\s+(the\s+\1)$/i', '$2', $author);
 	$author = trim($author);
 
-	if ($author === '' && preg_match('/Dan\s+(Walters|Morain)/i', $article['title'], $m)) {
-		$author = 'Dan ' . $m[1] . ' d' . strtolower($m[1]) . '@sacbee.com';
+	if ($author === '') {
+		foreach ($titleMap as $name => $primary) {
+			if (preg_match('/' . $name . '/i', $article['title'])) {
+				$last = preg_replace('/^.*\s([^\s]+)$/', '$1', $primary);
+				$email = strtolower($primary{0} . $last . '@sacbee.com');
+				$author = $primary . ' ' . $email;
+				break;
+			}
+		}
 	}
 
 	if (preg_match('/\s+([^@\s]+@[^@\s]+|the\s*sacramento\s*bee)$/i', $author, $m)) {
@@ -85,7 +94,7 @@ foreach ($response['articles'] as $article) {
 		if (isset($authorMap[$authorLC])) {
 			$file = 'http://' . Config::IMGHOST . Config::AUTHORDIR . $authorMap[$authorLC] . '.jpg';
 			$profile = '<img class="sf-profile" src="' . $file . '" alt="' . $author . '">';
-		} else if (preg_match('/^([^,]+),/', $author, $first) && isset($authorMap[strtolower($first[1])])) {
+		} else if (preg_match('/^([^,]+)(?:,|\s+and)\s+/', $author, $first) && isset($authorMap[strtolower($first[1])])) {
 			$file = 'http://' . Config::IMGHOST . Config::AUTHORDIR . $authorMap[strtolower($first[1])] . '.jpg';
 			$profile = '<img class="sf-profile" src="' . $file . '" alt="' . $author . '">';
 		}

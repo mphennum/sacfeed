@@ -56,17 +56,20 @@ class WWWSection extends Request {
 			$articles[] = $article->getAPIFields();
 		}
 
+		$titleMap = [];
 		$authorMap = [];
 		$cursor = Author::find();
 		foreach ($cursor as $record) {
 			$author = new Author($record);
 			foreach ($author->names as $name) {
 				$authorMap[strtolower($name)] = $author->_id;
+				$titleMap[$name] = $author->names[0];
 			}
 		}
 
 		$this->response->result['sections'] = $sections;
 		$this->response->result['articles'] = $articles;
+		$this->response->result['titleMap'] = $titleMap;
 		$this->response->result['authorMap'] = $authorMap;
 
 		return true;
