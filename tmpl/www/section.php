@@ -20,12 +20,15 @@ header('Content-Type: text/html; charset=UTF-8');
 <title>sacbee article feed - sacfeed</title>
 
 <? include(__DIR__ . '/ssi/styles.php'); ?>
+<? include(__DIR__ . '/ssi/scripts.php'); ?>
 
 </head>
 
 <body>
 
 <header>
+
+<div class="sf-wrapper">
 
 <h1><a href="http://<?= Config::WWWHOST ?>/">sacfeed</a></h1>
 
@@ -38,6 +41,8 @@ foreach ($response['sections'] as $section) {
 }
 ?>
 </nav>
+
+</div>
 
 </header>
 
@@ -126,7 +131,7 @@ foreach ($response['articles'] as $article) {
 ?>
 </main>
 
-<? include(__DIR__ . '/ssi/scripts.php'); ?>
+<? include(__DIR__ . '/ssi/async.php'); ?>
 
 </body>
 
