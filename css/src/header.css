@@ -15,8 +15,9 @@ header {
 
 header .sf-wrapper {
 	margin: 0 auto;
+	padding: 0 5px;
 	width: 100%;
-	max-width: 350px;
+	max-width: 340px;
 	position: relative;
 }
 

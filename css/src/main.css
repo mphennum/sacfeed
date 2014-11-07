@@ -7,7 +7,7 @@ article {
 
 	margin: 0 auto 5px auto;
 	width: 100%;
-	max-width: 350px;
+	max-width: 330px;
 }
 
 article .sf-top {
@@ -33,8 +33,8 @@ article h2 a {
 }
 
 article .sf-bottom {
-	background: #EEE;
-	border-top: 1px solid #DDD;
+	background: #F8F8F8;
+	border-top: 1px solid #CCC;
 	border-bottom-left-radius: 3px;
 	border-bottom-right-radius: 3px;
 	color: #999;
