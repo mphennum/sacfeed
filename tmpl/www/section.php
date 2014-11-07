@@ -93,8 +93,8 @@ foreach ($response['articles'] as $article) {
 		}
 	}
 
-	if (preg_match('/\s+([^@\s]+@[^@\s]+|the\s*sacramento\s*bee)$/i', $author, $m)) {
-		$author = preg_replace('/\s+(?:[^@\s]+@[^@\s]+|the\s*sacramento\s*bee)$/i', '', $author);
+	if (preg_match('/\s+([^@\s]+@[^@\s]+(?:,\s*[^@\s]+@[^@\s]+)*|the\s*sacramento\s*bee)$/i', $author, $m)) {
+		$author = preg_replace('/\s+(?:[^@\s]+@[^@\s]+(?:,\s*[^@\s]+@[^@\s]+)*|the\s*sacramento\s*bee)$/i', '', $author);
 		$authorLC = strtolower($author);
 		if (isset($authorMap[$authorLC])) {
 			$file = 'http://' . Config::IMGHOST . Config::AUTHORDIR . $authorMap[$authorLC] . '.jpg';
