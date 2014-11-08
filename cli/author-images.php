@@ -9,7 +9,7 @@ use Sacfeed\DB\Author;
 
 require __DIR__ . '/../sys/bootstrap.php';
 
-CLI::init('Sacfeed -- author images cli', [
+CLI::init(__FILE__, 'Sacfeed -- author images cli', [
 	'n:' => 'author name / list of names',
 	'i:' => 'author image/id',
 	'r:' => 'author image/id to remove'

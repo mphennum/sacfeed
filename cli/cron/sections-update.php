@@ -9,7 +9,7 @@ use Sacfeed\DB\Section;
 
 require __DIR__ . '/../../sys/bootstrap.php';
 
-CLI::init('Sacfeed -- update sections cli');
+CLI::init(__FILE__, 'Sacfeed -- update sections cli');
 
 $url = 'http://www.sacbee.com/';
 

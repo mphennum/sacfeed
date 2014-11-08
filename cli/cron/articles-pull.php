@@ -10,7 +10,7 @@ use Sacfeed\DB\Article;
 
 require __DIR__ . '/../../sys/bootstrap.php';
 
-CLI::init('Sacfeed -- pull new articles cli');
+CLI::init(__FILE__, 'Sacfeed -- pull new articles cli');
 
 $ts = new MongoDate();
 $ts->sec -= 60 * 60 * 3;

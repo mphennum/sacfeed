@@ -34,7 +34,7 @@ class CLI {
 		'white' => "\033[1;37m"
 	];
 
-	static public function init($title, $opts = []) {
+	static public function init($file, $title, $opts = []) {
 		$short = '';
 		$long = [];
 		foreach ($opts as $opt => $message) {
@@ -69,7 +69,7 @@ class CLI {
 			$opts = array_merge(self::$reserved, $opts);
 			self::$verbose = true;
 
-			$file = explode('/', __FILE__);
+			$file = explode('/', $file);
 			$file = $file[count($file) - 1];
 
 			CLI::message($title);
