@@ -223,7 +223,6 @@ var load = function(modules, callback) {
 	var completed = 0;
 	var ready = function(mods) {
 		mods = mods || [];
-		console.log(mods);
 
 		var pkgtotal = mods.length;
 		var pkgcompleted = 0;
@@ -272,14 +271,12 @@ var load = function(modules, callback) {
 		var mods = [];
 		var mod = sacfeed.packageMap[module];
 		if (mod) {
-			console.log('Found package ' + mod);
 			var pkg = sacfeed.packages[mod];
 			for (var j = 0, l = pkg.length; j < l; ++j) {
 				mods.push(pkg[j]);
 				sacfeed.modules[pkg[j]] = true;
 			}
 		} else {
-			console.log('No package for ' + module);
 			mods = [module];
 			sacfeed.modules[module] = true;
 		}
