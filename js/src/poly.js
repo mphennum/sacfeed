@@ -139,6 +139,34 @@ Poly.init = function(callback) {
 		return s;
 	};
 
+	// Function
+
+	Function.prototype.bind = Function.prototype.bind || function(that) {
+		var target = this;
+
+		if (typeof target !== 'function') {
+			throw new TypeError();
+		}
+
+		var slice = Array.prototype.slice;
+		var args = slice.call(arguments, 1);
+		var bound = function () {
+			if (!(this instanceof bound)) {
+				return target.apply(that, args.concat(slice.call(arguments)));
+			}
+
+			var func = function(){};
+			func.prototype = target.prototype;
+			var self = new func();
+
+			var result = target.apply(self, args.concat(slice.call(arguments)));
+
+			return (Object(result) === result) ? result : self;
+		};
+
+		return bound;
+	};
+
 	// Date
 
 	var monthMap = [
