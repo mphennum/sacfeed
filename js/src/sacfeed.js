@@ -62,29 +62,78 @@ sacfeed.init = function(callback) {
 
 				var done = false;
 				xhr.onreadystatechange = function() {
-					if (xhr.readyState === 4 && !done) {
-						done = true;
-						callback(JSON.parse(xhr.responseText));
+					if (xhr.readyState !== 4 || done) {
+						return;
 					}
+
+					done = true;
+
+					var headers = {};
+					var head = xhr.getAllResponseHeaders().split('\n');
+					for (var i = 0, n = head.length; i < n; ++i) {
+						var header = head[i].trim();
+						if (!header) {
+							continue;
+						}
+
+						var parts = header.split(/\s*:\s*/);
+						headers[parts[0].toLowerCase()] = parts[1];
+					}
+
+					var ttl = 0;
+					if (headers['cache-control']) {
+						var vars = headers['cache-control'].split(/\s*[,;]\s*/);
+						for (var i = 0, n = vars.length; i < n; ++i) {
+							var parts = vars[i].trim().split(/\s*=\s*/);
+							if (parts[0] === 'max-age') {
+								ttl = parseInt(parts[1]);
+								break;
+							}
+						}
+					} else if (headers['expires']) {
+						var now = new Date();
+						var expires = new Date(headers['expires']);
+						ttl = parseInt((expires.getTime() - now.getTime()) / 1000);
+					}
+
+					var status = {
+						'code': xhr['status'],
+						'message': xhr['statusText'],
+						'ttl': (ttl < 0) ? 0 : ttl
+					};
+
+					callback(status, headers, xhr.responseText);
 				};
 
 				xhr.send(null);
 			};
-		} else {
+		} else if (sacfeed.Detect.XDR) {
 			sacfeed.request = function(method, url, params, callback) {
-				callback = callback || KON.noop;
+				callback = callback || sacfeed.noop;
 
 				var xdr = new XDomainRequest();
 				xdr.onprogress = sacfeed.noop; // prevents random "aborted" when the request was successful bug (IE)
 				xdr.ontimeout = sacfeed.noop;
 				xdr.onerror = sacfeed.noop;
+
+				var done = false;
 				xdr.onload = function() {
-					callback(JSON.parse(xdr.responseText));
+					if (done) {
+						return;
+					}
+
+					done = true;
+
+					var status = {};
+					var headers = {};
+					callback(status, headers, xdr.responseText);
 				};
 
 				xdr.open(method, url);
 				xdr.send();
 			};
+		} else { // jsonp fallback
+			sacfeed.request = sacfeed.noop;
 		}
 
 
@@ -104,7 +153,7 @@ sacfeed.init = function(callback) {
 
 	for (var i = 0, n = required.length; i < n; ++i) {
 		if (/^(?:https?:)?\/\//.test(required[i])) {
-			sacfeed.include(required[i], ready);
+			sacfeed.inc(required[i], ready);
 		} else {
 			load(required[i], ready);
 		}
@@ -133,7 +182,17 @@ sacfeed.req = function(crud, req, params, callback) {
 		}
 	}
 
-	sacfeed.request(method, uri, params, callback);
+	sacfeed.request(method, uri, params, function(status, headers, responseText) {
+		var resp = JSON.parse(responseText.trim());
+		if (status.code < 200 || status.code > 299) {
+			var ttl = status.ttl;
+			status = resp;
+			status['ttl'] = ttl;
+			resp = null;
+		}
+
+		callback(status, headers, resp);
+	});
 };
 
 // load module(s)
@@ -148,12 +207,31 @@ var load = function(modules, callback) {
 
 	var total = modules.length;
 	var completed = 0;
-	var ready = function() {
-		if (++completed < total) {
-			return;
-		}
+	var ready = function(mods) {
+		var pkgtotal = mods.length;
+		var pkgcompleted = 0;
+		var pkgready = function() {
+			if (++pkgcompleted < pkgtotal) {
+				return;
+			}
 
-		callback();
+			if (++completed < total) {
+				return;
+			}
+
+			callback();
+		};
+
+		for (var i = 0, n = mods.length; i < n; ++i) {
+			var mod = mods[i];
+			var parts = mod.split('.');
+			mod = sacfeed;
+			for (var j = 0, l = parts.length; j < l; ++j) {
+				mod = mod[parts[j]];
+			}
+
+			mod.init(pkgready);
+		}
 	};
 
 	for (var i = 0, n = modules.length; i < n; ++i) {
@@ -163,17 +241,26 @@ var load = function(modules, callback) {
 			break;
 		}
 
-		var pkg = sacfeed.packageMap[module];
-		if (pkg) {
+		var mods = [];
+		var mod = sacfeed.packageMap[module];
+		if (mod) {
+			var pkg = sacfeed.packages[mod];
 			for (var k in pkg) {
-				sacfeed.modules[module] = true;
+				mods.push(k);
+				sacfeed.modules[k] = true;
 			}
-
-			sacfeed.include(sacfeed.urls['js'] + pkg.toLowerCase().replace('.', '/') + '.js', ready);
 		} else {
-			sacfeed.modules[module] = true;
-			sacfeed.include(sacfeed.urls['js'] + module.toLowerCase().replace('.', '/') + '.js', ready);
+			mod = module;
+			mods = [mod];
+			sacfeed.modules[mod] = true;
 		}
+
+		// bind not available until poly loads
+		sacfeed.inc(sacfeed.urls['js'] + mod.toLowerCase().replace('.', '/') + '.js', (function(mods) {
+			return function() {
+				ready(mods);
+			};
+		})(mods));
 	}
 };
 

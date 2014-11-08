@@ -54,7 +54,7 @@ sacfeed.request = function() {
 
 // include external script
 
-sacfeed.include = function(src, callback) {
+sacfeed.inc = function(src, callback) {
 	callback = callback || sacfeed.noop;
 
 	if (/^\/\//.test(src)) {
@@ -97,6 +97,8 @@ sacfeed.include = function(src, callback) {
 };
 
 var date = new Date();
-sacfeed.include('//js.sacfeed.com/' + (sacfeed.devmode ? 'src' : 'min') + '/sacfeed.js');
+
+
+sacfeed.inc('//js.sacfeed.com/' + (sacfeed.devmode ? 'src' : 'min') + '/sacfeed.js');
 
 })();
