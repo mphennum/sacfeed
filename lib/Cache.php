@@ -39,10 +39,10 @@ abstract class Cache {
 		return self::$memcached->get(self::createKey($key, $params));
 	}
 
-	static public function set($key, $params = [], $value, $ttl = Config::SHORTCACHE, $shutdown = false) {
+	static public function set($key, $params = [], $value, $ttl = Config::SHORTCACHE, $queue = false) {
 		$key = self::createKey($key, $params);
 
-		if ($shutdown) {
+		if ($queue) {
 			self::$queue[] = [
 				'type' => self::SET,
 				'key' => $key,
@@ -56,10 +56,10 @@ abstract class Cache {
 		return self::$memcached->set($key, $value, $ttl - 1);
 	}
 
-	static public function delete($key, $params = [], $shutdown = false) {
+	static public function delete($key, $params = [], $queue = false) {
 		$key = self::createKey($key, $params);
 
-		if ($shutdown) {
+		if ($queue) {
 			self::$queue[] = [
 				'type' => self::DEL,
 				'key' => $key
@@ -72,12 +72,12 @@ abstract class Cache {
 	}
 
 	static public function createKey($key, $params = []) {
-		$cacheKey = 'sacfeed:' . $key;
-		foreach ($params as $key => $value) {
-			$cacheKey .= ':' . $key . '=' . (string) $value;
+		$key = 'sacfeed:' . $key;
+		foreach ($params as $k => $v) {
+			$key = ':' . $k . '=' . (string) $v;
 		}
 
-		return $cacheKey;
+		return $key;
 	}
 
 	// shutdown
