@@ -37,19 +37,19 @@ window.sacfeed['packageMap'] = {%s};
 })();
 EOT;
 
-$map = [];
 $packages = [];
+$packageMap = [];
 foreach ($manifest as $package => $files) {
 	$pkg = [];
 	foreach ($files as $file) {
 		$pkg[] = '"' . $file . '"';
-		$map[] = '"' . $file . '": "' . $package . '"';
+		$packageMap[] = '"' . $file . '": "' . $package . '"';
 	}
 
 	$packages[] = '"' . $package . '": [' . implode(',', $pkg) . ']';
 }
 
-$script = sprintf($script, implode(',', $map), implode(',', $packages));
+$script = sprintf($script, implode(',', $packages), implode(',', $packageMap));
 $tmp = $dir . '/tmp/live.js';
 file_put_contents($tmp, $script);
 
