@@ -8,10 +8,8 @@ var sacfeed = window.sacfeed = window.sacfeed || {};
 
 sacfeed.packages = sacfeed.packages || {};
 sacfeed.packageMap = sacfeed.packageMap || {};
-sacfeed.modules = {};
-sacfeed.scripts = {};
 
-sacfeed.urls = sacfeed.urls || {};
+sacfeed.urls = {};
 sacfeed.urls['api'] = '//api.sacfeed.com/';
 sacfeed.urls['js'] = '//js.sacfeed.com/' + (sacfeed.devmode ? 'src/' : 'min/');
 
@@ -41,6 +39,10 @@ sacfeed.init = function(callback) {
 		'Detect'
 	];
 
+	var analyticsMap = {
+		'ga': 'Ext.GA'
+	};
+
 	var total = required.length;
 
 	var completed = 0;
@@ -51,8 +53,10 @@ sacfeed.init = function(callback) {
 
 		sacfeed.$ = window.jQuery;
 
+		// load
 		sacfeed.load = load;
 
+		// request
 		if (sacfeed.Detect.XHR) {
 			sacfeed.request = function(method, url, params, callback) {
 				callback = callback || sacfeed.noop;
@@ -136,7 +140,7 @@ sacfeed.init = function(callback) {
 			sacfeed.request = sacfeed.noop;
 		}
 
-
+		// delayed
 		for (var i = 0, n = sacfeed.delayed.length; i < n; ++i) {
 			var delayed = sacfeed.delayed[i];
 			if (delayed.type === 'load') {
@@ -147,6 +151,16 @@ sacfeed.init = function(callback) {
 		}
 
 		delete sacfeed.delayed;
+
+		// analytics
+		for (var i = 0, n = sacfeed.analytics.length; i < n; ++i) {
+			var analytic = analyticsMap[sacfeed.analytics[i]];
+			if (!analytic) {
+				throw new Error('Invalid analytics item "' + sacfeed.analytics[i] + '"');
+			}
+
+			sacfeed.load(analytic);
+		}
 
 		callback();
 	};
@@ -167,7 +181,7 @@ sacfeed.req = function(crud, req, params, callback) {
 
 	var method = crudMap[crud];
 	if (method !== 'GET') {
-		throw new Exception('CRUD action "' + crud + '" not allowed for sacfeed api requests');
+		throw new Error('CRUD action "' + crud + '" not allowed for sacfeed api requests');
 	}
 
 	var uri = sacfeed.urls['api'] + req; // + '.json';
@@ -208,6 +222,9 @@ var load = function(modules, callback) {
 	var total = modules.length;
 	var completed = 0;
 	var ready = function(mods) {
+		mods = mods || [];
+		console.log(mods);
+
 		var pkgtotal = mods.length;
 		var pkgcompleted = 0;
 		var pkgready = function() {
@@ -222,6 +239,11 @@ var load = function(modules, callback) {
 			callback();
 		};
 
+		if (mods.length) {
+			pkgready();
+			return;
+		}
+
 		for (var i = 0, n = mods.length; i < n; ++i) {
 			var mod = mods[i];
 			var parts = mod.split('.');
@@ -230,7 +252,13 @@ var load = function(modules, callback) {
 				mod = mod[parts[j]];
 			}
 
-			mod.init(pkgready);
+			if (!mod) {
+				throw new Error('Module "' + mod + '"" not found');
+			}
+
+			if (mod.init) {
+				mod.init(pkgready);
+			}
 		}
 	};
 
@@ -244,19 +272,20 @@ var load = function(modules, callback) {
 		var mods = [];
 		var mod = sacfeed.packageMap[module];
 		if (mod) {
+			console.log('Found package ' + mod);
 			var pkg = sacfeed.packages[mod];
-			for (var k in pkg) {
-				mods.push(k);
-				sacfeed.modules[k] = true;
+			for (var j = 0, l = pkg.length; j < l; ++j) {
+				mods.push(pkg[j]);
+				sacfeed.modules[pkg[j]] = true;
 			}
 		} else {
-			mod = module;
-			mods = [mod];
-			sacfeed.modules[mod] = true;
+			console.log('No package for ' + module);
+			mods = [module];
+			sacfeed.modules[module] = true;
 		}
 
 		// bind not available until poly loads
-		sacfeed.inc(sacfeed.urls['js'] + mod.toLowerCase().replace('.', '/') + '.js', (function(mods) {
+		sacfeed.inc(sacfeed.urls['js'] + mods[0].toLowerCase().replace('.', '/') + '.js', (function(mods) {
 			return function() {
 				ready(mods);
 			};

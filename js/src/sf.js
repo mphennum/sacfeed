@@ -14,6 +14,7 @@ var head = document.getElementsByTagName('head')[0];
 
 sacfeed.noop = function() {};
 sacfeed.scripts = {};
+sacfeed.modules = {'sf': true};
 
 // dev mode & analytics
 
@@ -21,7 +22,7 @@ sacfeed.analytics = [];
 sacfeed.devmode = false;
 var scripts = document.getElementsByTagName('script');
 for (var i = 0, n = scripts.length; i < n; ++i) {
-	var m = scripts[i].src.match(/\/(min|src)\/sf.js(#.*)?$/);
+	var m = scripts[i].src.match(/\/(min|src)\/sf.js(?:#(.*))?$/);
 	if (m) {
 		sacfeed.devmode = (m[1] === 'src');
 		if (m[2]) {

@@ -1,18 +1,18 @@
 (function() {
 
 var sacfeed = window.sacfeed;
-if (sacfeed && sacfeed.ui) {
+if (sacfeed.UI) {
 	return;
 }
 
-var ui = sacfeed.ui = {};
+var UI = sacfeed.UI = {};
 
-ui.init = function(callback) {
-	delete ui.init;
+UI.init = function(callback) {
+	delete UI.init;
 
-	if (callback) {
-		callback();
-	}
+	callback = callback || sacfeed.noop;
+
+	callback();
 };
 
 })();

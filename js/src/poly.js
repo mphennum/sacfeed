@@ -3,14 +3,12 @@
 'use strict';
 
 var sacfeed = window.sacfeed;
-
 if (sacfeed.Poly) {
 	return;
 }
 
 var Poly = sacfeed.Poly = {};
 
-sacfeed.modules['Poly'] = true;
 Poly.init = function(callback) {
 	delete Poly.init;
 
