@@ -2,6 +2,7 @@
 
 namespace Sacfeed\API;
 
+use Sacfeed\Config;
 use Sacfeed\Request;
 use Sacfeed\DB\Section;
 
@@ -26,6 +27,7 @@ class APISectionList extends Request {
 			$sections[] = $section->getAPIFields();
 		}
 
+		$this->response->ttl = Config::MEDIUMCACHE;
 		$this->response->result['sections'] = $sections;
 		return true;
 	}

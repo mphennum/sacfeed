@@ -2,6 +2,7 @@
 
 namespace Sacfeed\WWW;
 
+use Sacfeed\Config;
 use Sacfeed\Request;
 use Sacfeed\DB\Article;
 use Sacfeed\DB\Author;
@@ -67,11 +68,11 @@ class WWWSection extends Request {
 			}
 		}
 
+		$this->response->ttl = Config::LONGCACHE;
 		$this->response->result['sections'] = $sections;
 		$this->response->result['articles'] = $articles;
 		$this->response->result['titleMap'] = $titleMap;
 		$this->response->result['authorMap'] = $authorMap;
-
 		return true;
 	}
 }

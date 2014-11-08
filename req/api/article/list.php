@@ -91,6 +91,7 @@ class APIArticleList extends Request {
 			$articles[] = $article->getAPIFields();
 		}
 
+		$this->response->ttl = Config::SHORTCACHE;
 		$this->response->result['articles'] = $articles;
 		return true;
 	}
