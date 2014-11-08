@@ -21,13 +21,11 @@ sacfeed.analytics = [];
 sacfeed.devmode = false;
 var scripts = document.getElementsByTagName('script');
 for (var i = 0, n = scripts.length; i < n; ++i) {
-	var script = scripts[i];
-	if (/\/(?:min|src)\/sf.js(?:#.*)?$/.test(script.src)) {
-		sacfeed.devmode = true;
-
-		var m = script.src.match(/#(.*)$/);
-		if (m[1]) {
-			sacfeed.analytics = m[1].split(',');
+	var m = scripts[i].src.match(/\/(min|src)\/sf.js(#.*)?$/);
+	if (m) {
+		sacfeed.devmode = (m[1] === 'src');
+		if (m[2]) {
+			sacfeed.analytics = m[2].split(',');
 		}
 
 		break;
