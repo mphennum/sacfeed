@@ -262,7 +262,6 @@ var load = function(modules, callback) {
 
 	for (var i = 0, n = modules.length; i < n; ++i) {
 		var module = modules[i];
-		console.log('module = ' + module);
 		if (sacfeed.modules[module]) {
 			ready();
 			break;
@@ -284,8 +283,6 @@ var load = function(modules, callback) {
 		} else {
 			mods = [module];
 		}
-
-		console.log('package = ' + mods[0]);
 
 		// bind not available until poly loads
 		sacfeed.inc(sacfeed.urls['js'] + mods[0].toLowerCase().replace('.', '/') + '.js', (function(mods) {

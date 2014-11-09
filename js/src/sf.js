@@ -79,7 +79,6 @@ sacfeed.inc = function(src, callback) {
 		return;
 	}
 
-	console.log(src);
 	sacfeed.scripts[src] = true;
 
 	var script = document.createElement('script');
