@@ -1,6 +1,5 @@
-(function() {
+(function(sacfeed) {
 
-var sacfeed = window.sacfeed;
 var Ext = sacfeed.Ext = sacfeed.Ext || {};
 if (Ext.GA) {
 	return;
@@ -8,12 +7,16 @@ if (Ext.GA) {
 
 var GA = Ext.GA = {};
 
+sacfeed.modules['Ext.GA'] = sacfeed.LOADED;
 GA.init = function(callback) {
 	delete GA.init;
 
 	callback = callback || sacfeed.noop;
 
-	callback();
+	sacfeed.load('Ext', function() {
+		sacfeed.modules['Ext.GA'] = sacfeed.INITIALIZED;
+		callback();
+	});
 };
 
-})();
+})(window.sacfeed);

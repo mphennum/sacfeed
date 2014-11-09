@@ -1,14 +1,14 @@
-(function() {
+(function(sacfeed) {
 
 'use strict';
 
-var sacfeed = window.sacfeed;
 if (sacfeed.Detect) {
 	return;
 }
 
 var Detect = sacfeed.Detect = {};
 
+sacfeed.modules['Detect'] = sacfeed.LOADED;
 Detect.init = function(callback) {
 	delete Detect.init;
 
@@ -17,7 +17,8 @@ Detect.init = function(callback) {
 	Detect.XHR = (XMLHttpRequest && 'withCredentials' in new XMLHttpRequest());
 	Detect.XDR = (typeof XDomainRequest !== 'undefined');
 
+	sacfeed.modules['Detect'] = sacfeed.INITIALIZED;
 	callback();
 };
 
-})();
+})(window.sacfeed);

@@ -1,14 +1,14 @@
-(function() {
+(function(sacfeed, Number, String, Function, Date) {
 
 'use strict';
 
-var sacfeed = window.sacfeed;
 if (sacfeed.Poly) {
 	return;
 }
 
 var Poly = sacfeed.Poly = {};
 
+sacfeed.modules['Poly'] = sacfeed.LOADED;
 Poly.init = function(callback) {
 	delete Poly.init;
 
@@ -16,25 +16,25 @@ Poly.init = function(callback) {
 
 	// Number
 
-	Number.prototype.toLowerCase = Number.prototype.toLowerCase || Number.prototype.toString;
+	Number.toLowerCase = Number.toLowerCase || Number.toString;
 
-	Number.prototype.toUpperCase = Number.prototype.toUpperCase || Number.prototype.toString;
+	Number.toUpperCase = Number.toUpperCase || Number.toString;
 
 	// String
 
-	String.prototype.ltrim = String.prototype.ltrim || String.prototype.trimLeft || function() {
+	String.ltrim = String.ltrim || String.trimLeft || function() {
 		return this.replace(/^\s+/, '');
 	};
 
-	String.prototype.rtrim = String.prototype.rtrim || String.prototype.trimRight || function() {
+	String.rtrim = String.rtrim || String.trimRight || function() {
 		return this.replace(/\s+$/, '');
 	};
 
-	String.prototype.trim = String.prototype.trim || function() {
+	String.trim = String.trim || function() {
 		return this.replace(/^\s+|\s+$/g, '');
 	};
 
-	String.prototype.ucwords = String.prototype.ucwords || function() {
+	String.ucwords = String.ucwords || function() {
 		return this.replace(/\b[a-z]+\b/gi, function(s) {
 			return s.charAt(0).toUpperCase() + s.substr(1).toLowerCase();
 		});
@@ -128,7 +128,7 @@ Poly.init = function(callback) {
 		{'base': 'z', 'letters': /[\u007A\u24E9\uFF5A\u017A\u1E91\u017C\u017E\u1E93\u1E95\u01B6\u0225\u0240\u2C6C\uA763]/g}
 	];
 
-	String.prototype.deaccent = String.prototype.deaccent || function() {
+	String.deaccent = String.deaccent || function() {
 		var s = this.toString();
 		for (var i = 0, n = deaccentMap.length; i < n; i++) {
 			s = s.replace(deaccentMap[i].letters, deaccentMap[i].base);
@@ -139,7 +139,7 @@ Poly.init = function(callback) {
 
 	// Function
 
-	Function.prototype.bind = Function.prototype.bind || function(that) {
+	Function.bind = Function.bind || function(that) {
 		var target = this;
 
 		if (typeof target !== 'function') {
@@ -185,7 +185,7 @@ Poly.init = function(callback) {
 
 	// intended to be similar to php's date format, copy "format characters" as needed from this page:
 	// https://php.net/manual/en/function.date.php
-	Date.prototype.format = Date.prototype.format || function(format, utc) {
+	Date.format = Date.format || function(format, utc) {
 		utc = utc || false;
 		format = format || 'Y-m-d H:i:s';
 
@@ -238,7 +238,8 @@ Poly.init = function(callback) {
 		return format;
 	};
 
+	sacfeed.modules['Poly'] = sacfeed.INITIALIZED;
 	callback();
 };
 
-})();
+})(window.sacfeed, Number.prototype, String.prototype, Function.prototype, Date.prototype);

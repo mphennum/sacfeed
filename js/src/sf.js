@@ -1,4 +1,4 @@
-(function() {
+(function(window, document) {
 
 'use strict';
 
@@ -6,15 +6,26 @@ if (window.sacfeed) {
 	return;
 }
 
-var sacfeed = window.sacfeed = {};
+var sacfeed = window.sacfeed = {
+	'version': 0,
+	'urls': {}
+};
 
 // vars
 
 var head = document.getElementsByTagName('head')[0];
+var date = new Date();
+
+sacfeed.REQUESTED = 1;
+sacfeed.LOADED = 2;
+sacfeed.INITIALIZED = 3;
 
 sacfeed.noop = function() {};
 sacfeed.scripts = {};
-sacfeed.modules = {'sf': true};
+sacfeed.modules = {};
+sacfeed.build = date.getFullYear() + '.' + date.getMonth() + '.' + date.getDate() + '.' + date.getHours();
+
+sacfeed.modules['sf'] = sacfeed.LOADED;
 
 // dev mode & analytics
 
@@ -32,6 +43,9 @@ for (var i = 0, n = scripts.length; i < n; ++i) {
 		break;
 	}
 }
+
+sacfeed.urls['api'] = '//api.sacfeed.com/v' + sacfeed.version + '/';
+sacfeed.urls['js'] = '//js.sacfeed.com/v' + sacfeed.version + '/' + (sacfeed.devmode ? 'src/' : sacfeed.build + '/min/');
 
 // delayed
 
@@ -65,6 +79,9 @@ sacfeed.inc = function(src, callback) {
 		return;
 	}
 
+	console.log(src);
+	sacfeed.scripts[src] = true;
+
 	var script = document.createElement('script');
 	script.type = 'text/javascript';
 	script.async = 'true';
@@ -80,7 +97,6 @@ sacfeed.inc = function(src, callback) {
 			head.removeChild(script);
 		}, 10);
 
-		sacfeed.scripts[src] = true;
 		callback();
 	};
 
@@ -95,9 +111,7 @@ sacfeed.inc = function(src, callback) {
 	head.appendChild(script);
 };
 
-var date = new Date();
+sacfeed.modules['sf'] = sacfeed.INITIALIZED;
+sacfeed.inc(sacfeed.urls['js'] + 'sacfeed.js');
 
-
-sacfeed.inc('//js.sacfeed.com/' + (sacfeed.devmode ? 'src' : 'min') + '/sacfeed.js');
-
-})();
+})(window, document);

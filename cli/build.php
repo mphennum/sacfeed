@@ -3,6 +3,8 @@
 
 namespace Sacfeed;
 
+use DateTime;
+
 require __DIR__ . '/../sys/bootstrap.php';
 
 CLI::init(__FILE__, 'Sacfeed -- build / minify', [
@@ -20,7 +22,7 @@ if (CLI::opt('c')) {
 	exit(0);
 }
 
-// js
+// Compile Javascript
 
 CLI::subtitle('Compiling Javascript');
 
@@ -31,11 +33,35 @@ $manifest = Config::$manifest['js'];
 $script = <<<'EOT'
 (function() {
 
+window.sacfeed['build'] = '%s';
 window.sacfeed['packages'] = {%s};
 window.sacfeed['packageMap'] = {%s};
 
 })();
 EOT;
+
+// build + version number
+
+$build = Config::VERSION . '.' . Config::MINORVERSION . '.';
+
+$file = $dir . '/js/build';
+if (file_exists($file)) {
+	$version = trim(file_get_contents($file));
+	if (strpos($version, $build) === 0 && preg_match('/\.([0-9]+)$/', $version, $m)) {
+		$version = ((int) $m[1]) + 1;
+	} else {
+		$version = 0;
+	}
+} else {
+	$version = 0;
+}
+
+$build = $build . (string) $version;
+file_put_contents($file, $build . "\n");
+
+CLI::notice('Build ' . $build);
+
+// packages
 
 $packages = [];
 $packageMap = [];
@@ -49,9 +75,13 @@ foreach ($manifest as $package => $files) {
 	$packages[] = '"' . $package . '": [' . implode(',', $pkg) . ']';
 }
 
-$script = sprintf($script, implode(',', $packages), implode(',', $packageMap));
+// live.js
+
+$script = sprintf($script, $build, implode(',', $packages), implode(',', $packageMap));
 $tmp = $dir . '/tmp/live.js';
 file_put_contents($tmp, $script);
+
+// combine + minify
 
 $compiler = $dir . '/bin/compiler.jar';
 foreach ($manifest as $package => $files) {
@@ -86,7 +116,7 @@ foreach ($manifest as $package => $files) {
 
 unlink($tmp);
 
-// css
+// Compile CSS
 
 CLI::subtitle('Compiling CSS');
 
