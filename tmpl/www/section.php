@@ -50,6 +50,8 @@ foreach ($response['sections'] as $section) {
 
 <?
 
+$authorURL = 'http://' . Config::IMGHOST . '/v' . Config::VERSION . '.' . Config::MINORVERSION . Config::AUTHORDIR;
+
 $titleMap = $response['titleMap'];
 $authorMap = $response['authorMap'];
 
@@ -97,10 +99,10 @@ foreach ($response['articles'] as $article) {
 		$author = preg_replace('/\s+(?:[^@\s]+@[^@\s]+(?:,\s*[^@\s]+@[^@\s]+)*|the\s*sacramento\s*bee)$/i', '', $author);
 		$authorLC = strtolower($author);
 		if (isset($authorMap[$authorLC])) {
-			$file = 'http://' . Config::IMGHOST . Config::AUTHORDIR . $authorMap[$authorLC] . '.jpg';
+			$file = $authorURL . $authorMap[$authorLC] . '.jpg';
 			$profile = '<img class="sf-profile" src="' . $file . '" alt="' . $author . '">';
 		} else if (preg_match('/^([^,]+)(?:,|\s+and)\s+/', $author, $first) && isset($authorMap[strtolower($first[1])])) {
-			$file = 'http://' . Config::IMGHOST . Config::AUTHORDIR . $authorMap[strtolower($first[1])] . '.jpg';
+			$file = $authorURL . $authorMap[strtolower($first[1])] . '.jpg';
 			$profile = '<img class="sf-profile" src="' . $file . '" alt="' . $author . '">';
 		}
 
@@ -132,6 +134,15 @@ foreach ($response['articles'] as $article) {
 </main>
 
 <? include(__DIR__ . '/ssi/async.php'); ?>
+<script>
+(function(sacfeed) {
+
+sacfeed.load('UI.Section', function() {
+	sacfeed.UI.Section().render();
+});
+
+})(window.sacfeed);
+</script>
 
 </body>
 
