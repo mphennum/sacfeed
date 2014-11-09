@@ -216,6 +216,13 @@ class Request {
 	static private function apiFactory($opts = []) {
 		$opts['format'] = isset($opts['format']) ? $opts['format'] : 'json';
 
+		if ($opts['version'] === null || $opts['version'] !== Config::VERSION) {
+			$request = new Request($opts);
+			$request->template = $opts['format'];
+			$request->response->badRequest('Invalid version');
+			return $request;
+		}
+
 		// no resource
 		if ($opts['resource'] === '') {
 			$request = new Request($opts);

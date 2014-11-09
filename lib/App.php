@@ -52,8 +52,14 @@ abstract class App {
 		$opts['secure'] = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
 		$opts['dnt'] = (isset($_SERVER['HTTP_DNT']) && $_SERVER['HTTP_DNT']);
 		$opts['referer'] = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : null;
-		$opts['uri'] = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : null;
+		$opts['uri'] = isset($_SERVER['REQUEST_URI']) ? preg_replace('/^\/v[0-9]+/', '', $_SERVER['REQUEST_URI']) : null;
 		$opts['sid'] = isset($_COOKIE['sid']) ? $_COOKIE['sid'] : null;
+
+		if (isset($_SERVER['REQUEST_URI']) && preg_match('/^\/v([0-9]+)/', $_SERVER['REQUEST_URI'], $m)) {
+			$opts['version'] = $m[1];
+		} else {
+			$opts['version'] = null;
+		}
 
 		if ($opts['method'] === 'POST' || $opts['method'] === 'PUT') {
 			$opts['params'] = $_POST;
