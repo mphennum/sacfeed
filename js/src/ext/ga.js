@@ -16,7 +16,7 @@ GA.init = function(callback) {
 	sacfeed.load('Ext', function() {
 		sacfeed.modules['Ext.GA'] = sacfeed.INITIALIZED;
 		callback();
-	});
-};
+	}); // sacfeed.load
+}; // GA.init
 
 })(window.sacfeed);

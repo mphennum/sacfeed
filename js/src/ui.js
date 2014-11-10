@@ -1,11 +1,9 @@
 (function() {
 
-var sacfeed = window.sacfeed;
-if (sacfeed.UI) {
-	return;
-}
+'use strict';
 
-var UI = sacfeed.UI = {};
+var sacfeed = window.sacfeed;
+var UI = sacfeed.UI = sacfeed.UI || {};
 
 sacfeed.modules['UI'] = sacfeed.LOADED;
 UI.init = function(callback) {
@@ -15,6 +13,6 @@ UI.init = function(callback) {
 
 	sacfeed.modules['UI'] = sacfeed.INITIALIZED;
 	callback();
-};
+}; // UI.init
 
 })();

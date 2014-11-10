@@ -19,6 +19,6 @@ Detect.init = function(callback) {
 
 	sacfeed.modules['Detect'] = sacfeed.INITIALIZED;
 	callback();
-};
+}; // Detect.init
 
 })(window.sacfeed);

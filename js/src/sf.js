@@ -52,18 +52,18 @@ sacfeed.urls['js'] = '//js.sacfeed.com/v' + sacfeed.version + '/' + (sacfeed.dev
 sacfeed.delayed = [];
 
 sacfeed.load = function() {
-	sacfeed.delayed = {
+	sacfeed.delayed.push({
 		'type': 'load',
 		'arguments': arguments
-	};
-};
+	});
+}; // sacfeed.load
 
 sacfeed.request = function() {
-	sacfeed.delayed = {
+	sacfeed.delayed.push({
 		'type': 'request',
 		'arguments': arguments
-	};
-};
+	});
+}; // sacfeed.request
 
 // include external script
 
@@ -108,7 +108,7 @@ sacfeed.inc = function(src, callback) {
 
 	script.src = src;
 	head.appendChild(script);
-};
+}; // sacfeed.init
 
 sacfeed.modules['sf'] = sacfeed.INITIALIZED;
 sacfeed.inc(sacfeed.urls['js'] + 'sacfeed.js');
