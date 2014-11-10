@@ -3,7 +3,9 @@
 
 all:
 	cli/build.php -v
-clean:
+combine:
 	cli/build.php -c -v
+clean:
+	cli/build.php -r -v
 help:
 	cli/build.php --help

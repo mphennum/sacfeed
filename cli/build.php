@@ -8,14 +8,15 @@ use DateTime;
 require __DIR__ . '/../sys/bootstrap.php';
 
 CLI::init(__FILE__, 'Sacfeed -- build / minify', [
-	'c' => 'clean the minified dir'
+	'c' => 'combine packages only, no minification',
+	'r' => 'remove the contests of the minified dir'
 ]);
 
 $dir = realpath(__DIR__ . '/../');
 
 // options
 
-if (CLI::opt('c')) {
+if (CLI::opt('r')) {
 	exec('rm -rf ' . $dir . '/js/min/*');
 	exec('rm -rf ' . $dir . '/css/min/*');
 	CLI::notice('Minified directories have been cleaned');
@@ -25,6 +26,8 @@ if (CLI::opt('c')) {
 // Compile Javascript
 
 CLI::subtitle('Compiling Javascript');
+
+$combine = CLI::opt('c');
 
 $manifest = Config::$manifest['js'];
 
@@ -44,9 +47,9 @@ EOT;
 
 $build = Config::VERSION . '.' . Config::MINORVERSION . '.';
 
-$file = $dir . '/js/build';
-if (file_exists($file)) {
-	$version = trim(file_get_contents($file));
+$buildFile = $dir . '/js/build';
+if (file_exists($buildFile)) {
+	$version = trim(file_get_contents($buildFile));
 	if (strpos($version, $build) === 0 && preg_match('/\.([0-9]+)$/', $version, $m)) {
 		$version = ((int) $m[1]) + 1;
 	} else {
@@ -57,9 +60,6 @@ if (file_exists($file)) {
 }
 
 $build = $build . (string) $version;
-file_put_contents($file, $build . "\n");
-
-CLI::notice('Build ' . $build);
 
 // packages
 
@@ -77,7 +77,7 @@ foreach ($manifest as $package => $files) {
 
 // live.js
 
-$script = sprintf($script, $build, implode(',', $packages), implode(',', $packageMap));
+$script = sprintf($script, $build, implode(',', $packages), implode(',', $packageMap)) . "\n";
 $tmp = $dir . '/tmp/live.js';
 file_put_contents($tmp, $script);
 
@@ -85,33 +85,66 @@ file_put_contents($tmp, $script);
 
 $compiler = $dir . '/bin/compiler.jar';
 foreach ($manifest as $package => $files) {
-	CLI::message('Compiling package: ', $package);
-	$cmd = 'java -jar ' . $compiler;
+	if ($combine) {
+		CLI::message('Combining Javascript package: ', $package);
 
-	if ($package === 'sacfeed') {
-		$cmd .= ' --js ' . $tmp;
-	}
-
-	foreach ($files as $file) {
-		$file = $dir . '/js/src/' . str_replace('.', '/', strtolower($file)) . '.js';
-		if (!file_exists($file)) {
-			CLI::error('File "' . $file . '" does not exist');
+		if ($package === 'sacfeed') {
+			$content = '// ***** LIVE.JS ***** //' . "\n\n" . file_get_contents($tmp);
+		} else {
+			$content = '';
 		}
 
-		$cmd .= ' --js ' . $file;
-	}
+		foreach ($files as $file) {
+			$filename = $file;
+			$file = $dir . '/js/src/' . str_replace('.', '/', strtolower($file)) . '.js';
 
-	$cmd .= ' --js_output_file ' . $dir . '/js/min/' . str_replace('.', '/', strtolower($package)) . '.js';
+			if (!file_exists($file)) {
+				CLI::error('File "' . $file . '" does not exist');
+			}
 
-	$mkdir = $dir . '/js/min/' . str_replace('.', '/', strtolower($package));
-	$mkdir = preg_replace('/\/[^\/]+$/', '', $mkdir);
-	if (!file_exists($mkdir)) {
-		if (!mkdir($mkdir, 0775, true)) {
-			CLI::error('mkdir failed for: ' . $mkdir);
+			$content .= "\n" . '// ***** ' . strtoupper($filename) . '.JS ***** //' . "\n\n" . file_get_contents($file);
 		}
-	}
 
-	exec($cmd);
+		$mkdir = $dir . '/js/min/' . str_replace('.', '/', strtolower($package));
+		$mkdir = preg_replace('/\/[^\/]+$/', '', $mkdir);
+		if (!file_exists($mkdir)) {
+			if (!mkdir($mkdir, 0775, true)) {
+				CLI::error('mkdir failed for: ' . $mkdir);
+			}
+		}
+
+		file_put_contents($dir . '/js/min/' . str_replace('.', '/', strtolower($package)) . '.js', $content);
+	} else {
+		CLI::message('Compiling Javascript package: ', $package);
+
+		$cmd = 'java -jar ' . $compiler;
+
+		if ($package === 'sacfeed') {
+			$cmd .= ' --js ' . $tmp;
+		}
+
+		foreach ($files as $file) {
+			$file = $dir . '/js/src/' . str_replace('.', '/', strtolower($file)) . '.js';
+
+			if (!file_exists($file)) {
+				CLI::error('File "' . $file . '" does not exist');
+			}
+
+			$cmd .= ' --js ' . $file;
+		}
+
+		$cmd .= ' --js_output_file ' . $dir . '/js/min/' . str_replace('.', '/', strtolower($package)) . '.js';
+
+		$mkdir = $dir . '/js/min/' . str_replace('.', '/', strtolower($package));
+		$mkdir = preg_replace('/\/[^\/]+$/', '', $mkdir);
+		if (!file_exists($mkdir)) {
+			if (!mkdir($mkdir, 0775, true)) {
+				CLI::error('mkdir failed for: ' . $mkdir);
+			}
+		}
+
+		exec($cmd);
+	}
 }
 
 unlink($tmp);
@@ -124,18 +157,45 @@ $manifest = Config::$manifest['css'];
 
 $compiler = $dir . '/bin/yuicompressor-2.4.8.jar';
 foreach ($manifest as $package => $files) {
-	CLI::message('Compiling package: ', $package);
+	if ($combine) {
+		CLI::message('Combining CSS package: ', $package);
 
+		$content = '';
+		foreach ($files as $file) {
+			$file = $dir . '/css/src/' . $file . '.css';
 
-	$tmp = $dir . '/tmp/' . $package . '.css';
-	$src = '';
-	foreach ($files as $file) {
-		$src .= file_get_contents($dir . '/css/src/' . $file . '.css');
+			if (!file_exists($file)) {
+				CLI::error('File "' . $file . '" does not exist');
+			}
+
+			$content .= file_get_contents($file);
+		}
+
+		file_put_contents($dir . '/css/min/' . $package . '.css', $content);
+	} else {
+		CLI::message('Compiling CSS package: ', $package);
+
+		$tmp = $dir . '/tmp/' . $package . '.css';
+		$src = '';
+		foreach ($files as $file) {
+			$file = $dir . '/css/src/' . $file . '.css';
+
+			if (!file_exists($file)) {
+				CLI::error('File "' . $file . '" does not exist');
+			}
+
+			$src .= file_get_contents($file);
+		}
+
+		file_put_contents($tmp, $src);
+
+		exec('java -jar ' . $compiler . ' ' . $tmp . ' -o ' . $dir . '/css/min/' . $package . '.css --type css --charset utf-8');
+
+		unlink($tmp);
 	}
-
-	file_put_contents($tmp, $src);
-
-	exec('java -jar ' . $compiler . ' ' . $tmp . ' -o ' . $dir . '/css/min/' . $package . '.css --type css --charset utf-8');
-
-	unlink($tmp);
 }
+
+// print build
+
+file_put_contents($buildFile, $build . "\n");
+CLI::notice('Build ' . $build);
