@@ -36,9 +36,11 @@ header('Content-Type: text/html; charset=UTF-8');
 
 <nav>
 <?
+
 foreach ($response['sections'] as $section) {
 	echo '<a href="http://', Config::WWWHOST, $section['id'], '">', $section['name'], '</a>', "\n";
 }
+
 ?>
 </nav>
 
@@ -47,7 +49,6 @@ foreach ($response['sections'] as $section) {
 </header>
 
 <main>
-
 <?
 
 $authorURL = 'http://' . Config::IMGHOST . '/v' . Config::VERSION . '.' . Config::MINORVERSION . Config::AUTHORDIR;
@@ -111,26 +112,28 @@ foreach ($response['articles'] as $article) {
 		$author = '<p class="sf-byline"><span class="sf-name">' . preg_replace('/^the\s/', 'The ', $author) . '</span></p>';
 	}
 
-	echo
-		'<article>', "\n",
-		'<div class="sf-top">', "\n",
-		$thumb
-	;
-
-	echo
-		'<h2><a href="', $article['url'], '">', $article['title'], '</a></h2>', "\n",
-		'<p class="sf-summary">', $article['summary'], '</p>', "\n",
-		'<p><a href="', $article['url'], '">read more</a></p>', "\n",
-		'</div>', "\n",
-		'<div class="sf-bottom">', "\n",
-		$profile,
-		$author, "\n",
-		'<p class="sf-date">', $date, '</p>', "\n",
-		'</div>', "\n",
-		'</article>', "\n\n"
-	;
-}
 ?>
+
+<article>
+<div class="sf-top">
+<?= $thumb ?>
+<h2><a href="', $article['url'], '"><?= $article['title'] ?></a></h2>
+<p class="sf-summary"><?= $article['summary'] ?></p>
+<p><a href="<?=$article['url'] ?>">read more</a></p>
+</div>
+<div class="sf-bottom">
+<?= $profile ?>
+<?= $author ?>
+
+<p class="sf-date"><?= $date ?></p>
+</div>
+</article>
+<?php
+
+}
+
+?>
+
 </main>
 
 <? include(__DIR__ . '/ssi/async.php'); ?>
