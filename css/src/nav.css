@@ -1,12 +1,14 @@
 /* nav */
 
 .sf-navbtn {
+	background: #0D76BA;
 	cursor: pointer;
 	display: block;
 
-	width: 21px;
+	padding: 5px 5px 0 5px;
+	width: 28px;
 	position: absolute;
-	top: 4px;
+	top: -1px;
 }
 
 .sf-navbtn hr {
@@ -18,7 +20,27 @@
 }
 
 nav {
+	box-shadow: 0 0 1px 1px #06A;
 	display: none;
 
+	min-width: 165px;
 	position: absolute;
+	top: 35px;
+}
+
+nav a {
+	background: #0D76BA;
+	color: #FFF;
+	display: block;
+	text-align: left;
+	text-decoration: none;
+
+	padding: 10px 35px 10px 10px;
+	width: 100%;
+}
+
+nav a:hover {
+	background: #1D86CA;
+	color: #FFF;
+	text-decoration: none;
 }
