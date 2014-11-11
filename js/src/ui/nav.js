@@ -43,7 +43,7 @@ Nav.init = function(callback) {
 			Ele.prototype.render.call(this);
 
 			this.$button.click((function(event) {
-				this.$.toggle();
+				this.$.fadeToggle(100);
 
 				if (event.preventDefault) {
 					event.preventDefault();
@@ -53,7 +53,7 @@ Nav.init = function(callback) {
 			}).bind(this));
 
 			sacfeed.$body.click((function() {
-				this.$.hide();
+				this.$.fadeOut(100);
 			}).bind(this));
 
 			return this;
