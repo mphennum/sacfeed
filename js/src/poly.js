@@ -175,7 +175,7 @@ Poly.init = function(callback) {
 
 	// Date
 
-	var monthMap = [
+	var monthmap = [
 		['Inv', 'Invalid'],
 		['Jan', 'January'],
 		['Feb', 'February'],
@@ -191,18 +191,29 @@ Poly.init = function(callback) {
 		['Dec', 'December']
 	];
 
+	var daymap = [
+		['Sun', 'Sunday'],
+		['Mon', 'Monday'],
+		['Tue', 'Tuesday'],
+		['Wed', 'Wednesday'],
+		['Thu', 'Thursday'],
+		['Fri', 'Friday'],
+		['Sat', 'Saturday']
+	];
+
 	// intended to be similar to php's date format, copy "format characters" as needed from this page:
 	// https://php.net/manual/en/function.date.php
 	Date.format = Date.format || function(format, utc) {
-		utc = utc || false;
 		format = format || 'Y-m-d H:i:s';
+		format = format.replace(/([a-z])/ig, '{{$1}}');
 
-		var year, month, day;
+		var year, month, day, dayweek;
 		var hour, minute, second;
 		if (utc) {
 			year = this.getUTCFullYear();
 			month = this.getUTCMonth();
 			day = this.getUTCDate();
+			dayweek = this.getUTCDay();
 
 			hour = this.getUTCHours();
 			minute = this.getUTCMinutes();
@@ -211,6 +222,7 @@ Poly.init = function(callback) {
 			year = this.getFullYear();
 			month = this.getMonth();
 			day = this.getDate();
+			dayweek = this.getDay();
 
 			hour = this.getHours()
 			minute = this.getMinutes();
@@ -221,7 +233,7 @@ Poly.init = function(callback) {
 
 		// date
 
-		format = format.replace('Y', function() {
+		format = format.replace('{{Y}}', function() {
 			var abs = Math.abs(year);
 
 			var prefix = '';
@@ -233,17 +245,23 @@ Poly.init = function(callback) {
 			return prefix + year;
 		});
 
-		format = format.replace('m', month < 10 ? '0' + month : month);
-		format = format.replace('M', monthMap[month][0]);
-		format = format.replace('d', day < 10 ? '0' + day : day);
+		format = format.replace('{{m}}', month < 10 ? '0' + month : month);
+		format = format.replace('{{M}}', monthmap[month][0]);
+		format = format.replace('{{F}}', monthmap[month][1]);
+		format = format.replace('{{d}}', day < 10 ? '0' + day : day);
+		format = format.replace('{{j}}', day);
+		format = format.replace('{{l}}', daymap[dayweek][1]);
 
 		// time
 
-		format = format.replace('H', hour < 10 ? '0' + hour : hour);
-		format = format.replace('i', minute < 10 ? '0' + minute : minute);
-		format = format.replace('s', second < 10 ? '0' + second : second);
+		format = format.replace('{{H}}', hour < 10 ? '0' + hour : hour);
+		format = format.replace('{{g}}', hour > 12 ? hour - 12 : hour);
+		format = format.replace('{{A}}', hour > 11 ? 'PM' : 'AM');
+		format = format.replace('{{a}}', hour > 11 ? 'pm' : 'am');
+		format = format.replace('{{i}}', minute < 10 ? '0' + minute : minute);
+		format = format.replace('{{s}}', second < 10 ? '0' + second : second);
 
-		return format;
+		return format.replace(/\{\{|\}\}/g, '');
 	};
 
 	callback();
