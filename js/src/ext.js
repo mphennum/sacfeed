@@ -1,18 +1,19 @@
 (function(sacfeed) {
 
-if (sacfeed.Ext) {
+'use strict';
+
+if (sacfeed.modules['Ext']) {
 	return;
 }
 
-var Ext = sacfeed.Ext = {};
+var Ext = sacfeed.Ext = sacfeed.Ext || {};
 
-sacfeed.modules['Ext'] = sacfeed.LOADED;
+sacfeed.modules['Ext'] = true;
 Ext.init = function(callback) {
 	delete Ext.init;
 
 	callback = callback || sacfeed.noop;
 
-	sacfeed.modules['Ext'] = sacfeed.INITIALIZED;
 	callback();
 };
 

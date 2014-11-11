@@ -2,14 +2,14 @@
 
 'use strict';
 
-var UI = sacfeed.UI = sacfeed.UI || {};
-if (UI.Ele) {
+if (sacfeed.modules['UI.Ele']) {
 	return;
 }
 
+var UI = sacfeed.UI = sacfeed.UI || {};
 var Ele = UI.Ele = {};
 
-sacfeed.modules['UI.Ele'] = sacfeed.LOADED;
+sacfeed.modules['UI.Ele'] = true;
 Ele.init = function(callback) {
 	delete Ele.init;
 
@@ -39,7 +39,6 @@ Ele.init = function(callback) {
 			return this;
 		}; // Ele.render
 
-		sacfeed.modules['UI.Ele'] = sacfeed.INITIALIZED;
 		callback();
 	}); // sacfeed.load
 }; // Ele.init

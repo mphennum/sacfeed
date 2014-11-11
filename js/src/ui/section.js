@@ -2,14 +2,14 @@
 
 'use strict';
 
-var UI = sacfeed.UI = sacfeed.UI || {};
-if (UI.Section) {
+if (sacfeed.modules['UI.Section']) {
 	return;
 }
 
+var UI = sacfeed.UI = sacfeed.UI || {};
 var Section = UI.Section = {};
 
-sacfeed.modules['UI.Section'] = sacfeed.LOADED;
+sacfeed.modules['UI.Section'] = true;
 Section.init = function(callback) {
 	delete Section.init;
 
@@ -24,7 +24,7 @@ Section.init = function(callback) {
 			}
 
 			opts = opts || {};
-			opts['parent'] = opts['parent'] || 'body';
+			opts['parent'] = opts['parent'] || sacfeed.$body;
 
 			Ele.prototype.constructor.call(this, opts);
 

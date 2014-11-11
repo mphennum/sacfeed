@@ -117,9 +117,9 @@ foreach ($response['articles'] as $article) {
 <article>
 <div class="sf-top">
 <?= $thumb ?>
-<h2><a href="', $article['url'], '"><?= $article['title'] ?></a></h2>
-<p class="sf-summary"><?= $article['summary'] ?></p>
-<p><a href="<?=$article['url'] ?>">read more</a></p>
+<h2><a href="<?= $article['url'] ?>"><?= $article['title'] ?></a></h2>
+<p class="sf-summary"><?= htmlentities($article['summary']) ?></p>
+<p><a href="<?= $article['url'] ?>">read more</a></p>
 </div>
 <div class="sf-bottom">
 <?= $profile ?>

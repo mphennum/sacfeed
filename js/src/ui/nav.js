@@ -2,14 +2,14 @@
 
 'use strict';
 
-var UI = sacfeed.UI = sacfeed.UI || {};
-if (UI.Nav) {
+if (sacfeed.modules['UI.Nav']) {
 	return;
 }
 
+var UI = sacfeed.UI = sacfeed.UI || {};
 var Nav = UI.Nav = {};
 
-sacfeed.modules['UI.Nav'] = sacfeed.LOADED;
+sacfeed.modules['UI.Nav'] = true;
 Nav.init = function(callback) {
 	delete Nav.init;
 
@@ -42,14 +42,23 @@ Nav.init = function(callback) {
 		Nav.prototype.render = function() {
 			Ele.prototype.render.call(this);
 
-			this.$button.click((function() {
+			this.$button.click((function(event) {
 				this.$.toggle();
+
+				if (event.preventDefault) {
+					event.preventDefault();
+				}
+
+				return false;
+			}).bind(this));
+
+			sacfeed.$body.click((function() {
+				this.$.hide();
 			}).bind(this));
 
 			return this;
 		}; // Nav.render
 
-		sacfeed.modules['UI.Nav'] = sacfeed.INITIALIZED;
 		callback();
 	}); // sacfeed.load
 }; // Nav.init

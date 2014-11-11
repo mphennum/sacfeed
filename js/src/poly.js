@@ -2,13 +2,13 @@
 
 'use strict';
 
-if (sacfeed.Poly) {
+if (sacfeed.modules['Poly']) {
 	return;
 }
 
 var Poly = sacfeed.Poly = {};
 
-sacfeed.modules['Poly'] = sacfeed.LOADED;
+sacfeed.modules['Poly'] = true;
 Poly.init = function(callback) {
 	delete Poly.init;
 
@@ -238,7 +238,6 @@ Poly.init = function(callback) {
 		return format;
 	};
 
-	sacfeed.modules['Poly'] = sacfeed.INITIALIZED;
 	callback();
 };
 

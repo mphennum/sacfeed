@@ -2,25 +2,26 @@
 
 'use strict';
 
+if (sacfeed.modules['sacfeed']) {
+	return;
+}
+
 // vars
 
-sacfeed.packages = sacfeed.packages || {};
-sacfeed.packageMap = sacfeed.packageMap || {};
+var packages = sacfeed.packages = sacfeed.packages || {};
+var packageMap = sacfeed.packageMap = {};
+for (var k in packages) {
+	var pkg = packages[k];
+	for (var i = 0, n = pkg.length; i < n; ++i) {
+		packageMap[pkg[i]] = k;
+	}
+}
 
 sacfeed.urls['js'] = '//js.sacfeed.com/v' +  (sacfeed.devmode ? sacfeed.version + '/src/' : sacfeed.build + '/min/');
 
-// local
-
-var crudMap = {
-	'create': 'POST',
-	'read': 'GET',
-	'update': 'PUT',
-	'delete': 'DELETE'
-};
-
 // init
 
-sacfeed.modules['sacfeed'] = sacfeed.LOADED;
+sacfeed.modules['sacfeed'] = true;
 sacfeed.init = function(callback) {
 	delete sacfeed.init;
 
@@ -29,24 +30,27 @@ sacfeed.init = function(callback) {
 	// preload
 
 	var required = [
-		'//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js',
 		'Poly',
 		'Detect'
 	];
+
+	if (!window.jQuery) {
+		required.unshift('//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js');
+	}
 
 	var analyticsMap = {
 		'ga': 'Ext.GA'
 	};
 
+	var done = 0;
 	var total = required.length;
-
-	var completed = 0;
 	var ready = function() {
-		if (++completed < total) {
+		if (++done < total) {
 			return;
 		}
 
-		sacfeed.$ = window.jQuery;
+		var $ = sacfeed.$ = window.jQuery;
+		sacfeed.$body = $('body');
 
 		// load
 		sacfeed.load = load;
@@ -102,10 +106,10 @@ sacfeed.init = function(callback) {
 					};
 
 					callback(status, headers, xhr.responseText);
-				};
+				}; // xhr.onreadystatechange
 
 				xhr.send(null);
-			};
+			}; // sacfeed.request
 		} else if (sacfeed.Detect.XDR) {
 			sacfeed.request = function(method, url, params, callback) {
 				callback = callback || sacfeed.noop;
@@ -159,20 +163,27 @@ sacfeed.init = function(callback) {
 
 		delete sacfeed.analytics;
 
-		sacfeed.modules['sacfeed'] = sacfeed.INITIALIZED;
 		callback();
-	};
+	}; // ready
 
-	for (var i = 0, n = required.length; i < n; ++i) {
-		if (/^(?:https?:)?\/\//.test(required[i])) {
-			sacfeed.inc(required[i], ready);
+	for (var i = 0; i < total; ++i) {
+		var req = required[i];
+		if (/^(?:https?:)?\/\//.test(req)) {
+			sacfeed.inc(req, ready);
 		} else {
-			load(required[i], ready);
+			load(req, ready);
 		}
 	}
 };
 
 // api request
+
+var crudMap = {
+	'create': 'POST',
+	'read': 'GET',
+	'update': 'PUT',
+	'delete': 'DELETE'
+};
 
 sacfeed.req = function(crud, req, params, callback) {
 	callback = callback || sacfeed.noop;
@@ -205,96 +216,94 @@ sacfeed.req = function(crud, req, params, callback) {
 
 		callback(status, headers, resp);
 	});
+}; // sacfeed.req
+
+// random ID
+
+sacfeed.randID = function() {
+	return Math.floor(Math.random() * 0x7FFFFFFF).toString(16);
 };
 
 // load module(s)
 
-var load = function(modules, callback) {
-	callback = callback || sacfeed.noop;
+var listen = {};
 
-	if (!(modules instanceof Array)) {
-		modules = [modules];
+var namespace = function(modname) {
+	if (modname === 'sacfeed') {
+		return sacfeed;
 	}
 
-	var total = modules.length;
-	var completed = 0;
-	var ready = function(mods) {
-		mods = mods || [];
+	var module = sacfeed;
+	var parts = modname.split('.');
+	for (var i = 0, n = parts.length; i < n; ++i) {
+		module = module[parts[i]];
+	}
 
-		var pkgtotal = mods.length;
-		var pkgcompleted = 0;
-		var pkgready = function() {
-			if (++pkgcompleted < pkgtotal) {
-				return;
-			}
+	return module;
+};
 
-			if (++completed < total) {
+var init = function(modname) {
+	var ready = function() {
+		for (var i = 0, n = listen[modname].length; i < n; ++i) {
+			listen[modname][i]();
+		}
+
+		delete listen[modname];
+	};
+
+	var ns = namespace(modname);
+	if (ns.init) {
+		ns.init(ready);
+		return;
+	}
+
+	ready();
+};
+
+var load = function(modname, callback) {
+	callback = callback || sacfeed.noop;
+
+	if (modname === null) {
+		callback();
+		return;
+	}
+
+	if (modname instanceof Array) {
+		var done = 0;
+		var n = modname.length;
+		var ready = function() {
+			if (++done < n) {
 				return;
 			}
 
 			callback();
 		};
 
-		if (!mods.length) {
-			pkgready();
-			return;
+		for (var i = 0; i < n; ++i) {
+			load(modname[i], ready);
 		}
 
-		for (var i = 0, n = mods.length; i < n; ++i) {
-			var modname = mods[i];
-			var parts = modname.split('.');
-			var mod = sacfeed;
-			if (parts[0] !== 'sacfeed' && parts[0] !== 'sf') {
-				for (var j = 0, l = parts.length; j < l; ++j) {
-					mod = mod[parts[j]];
-				}
-			}
-
-			if (!mod) {
-				throw new Error('Module "' + modname + '" not found');
-			}
-
-			if (mod.init) {
-				mod.init(pkgready);
-			}
-		}
-	};
-
-	for (var i = 0, n = modules.length; i < n; ++i) {
-		var module = modules[i];
-		if (sacfeed.modules[module]) {
-			ready();
-			break;
-		}
-
-		var mods = [];
-		var mod = sacfeed.packageMap[module];
-		if (mod) {
-			if (sacfeed.modules[mod]) {
-				ready();
-				break;
-			}
-
-			var pkg = sacfeed.packages[mod];
-			for (var j = 0, l = pkg.length; j < l; ++j) {
-				mods.push(pkg[j]);
-				sacfeed.modules[pkg[j]] = sacfeed.modules[pkg[j]] || sacfeed.REQUESTED;
-			}
-		} else {
-			mods = [module];
-		}
-
-		// bind not available until poly loads
-		sacfeed.inc(sacfeed.urls['js'] + mods[0].toLowerCase().replace('.', '/') + '.js', (function(mods) {
-			return function() {
-				ready(mods);
-			};
-		})(mods));
+		return;
 	}
-};
 
-// initialization
+	if (listen[modname]) {
+		listen[modname].push(callback);
+	} else if (sacfeed.modules[modname] && !namespace(modname).init) {
+		callback();
+	} else {
+		listen[modname] = [callback];
 
-sacfeed.init();
+		var map = packageMap[modname];
+		if (map) {
+			sacfeed.inc(sacfeed.urls['js'] + map.toLowerCase().replace('.', '/') + '.js', function() {
+				init(modname);
+			});
+		} else {
+			sacfeed.inc(sacfeed.urls['js'] + modname.toLowerCase().replace('.', '/') + '.js', function() {
+				init(modname);
+			});
+		}
+	}
+}; // load
 
 })(window, window.sacfeed, window.JSON);

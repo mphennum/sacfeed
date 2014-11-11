@@ -1,18 +1,20 @@
-(function() {
+(function(sacfeed) {
 
 'use strict';
 
-var sacfeed = window.sacfeed;
+if (sacfeed.modules['UI']) {
+	return;
+}
+
 var UI = sacfeed.UI = sacfeed.UI || {};
 
-sacfeed.modules['UI'] = sacfeed.LOADED;
+sacfeed.modules['UI'] = true;
 UI.init = function(callback) {
 	delete UI.init;
 
 	callback = callback || sacfeed.noop;
 
-	sacfeed.modules['UI'] = sacfeed.INITIALIZED;
 	callback();
 }; // UI.init
 
-})();
+})(window.sacfeed);

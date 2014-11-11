@@ -16,16 +16,10 @@ var sacfeed = window.sacfeed = {
 var head = document.getElementsByTagName('head')[0];
 var date = new Date();
 
-sacfeed.REQUESTED = 1;
-sacfeed.LOADED = 2;
-sacfeed.INITIALIZED = 3;
-
 sacfeed.noop = function() {};
 sacfeed.scripts = {};
 sacfeed.modules = {};
 sacfeed.build = date.getFullYear() + '.' + date.getMonth() + '.' + date.getDate() + '.' + date.getHours();
-
-sacfeed.modules['sf'] = sacfeed.LOADED;
 
 // dev mode & analytics
 
@@ -94,9 +88,8 @@ sacfeed.inc = function(src, callback) {
 		loaded = true;
 		setTimeout(function() {
 			head.removeChild(script);
+			callback();
 		}, 10);
-
-		callback();
 	};
 
 	script.onload = ready;
@@ -110,7 +103,8 @@ sacfeed.inc = function(src, callback) {
 	head.appendChild(script);
 }; // sacfeed.init
 
-sacfeed.modules['sf'] = sacfeed.INITIALIZED;
-sacfeed.inc(sacfeed.urls['js'] + 'sacfeed.js');
+sacfeed.inc(sacfeed.urls['js'] + 'sacfeed.js', function() {
+	sacfeed.init();
+});
 
 })(window, document);

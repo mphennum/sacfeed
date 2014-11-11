@@ -23,25 +23,11 @@ if (CLI::opt('r')) {
 	exit(0);
 }
 
+$combine = CLI::opt('c');
+
 // Compile Javascript
 
 CLI::subtitle('Compiling Javascript');
-
-$combine = CLI::opt('c');
-
-$manifest = Config::$manifest['js'];
-
-// live script
-
-$script = <<<'EOT'
-(function() {
-
-window.sacfeed['build'] = '%s';
-window.sacfeed['packages'] = {%s};
-window.sacfeed['packageMap'] = {%s};
-
-})();
-EOT;
 
 // build + version number
 
@@ -61,15 +47,26 @@ if (file_exists($buildFile)) {
 
 $build = $build . (string) $version;
 
+// live script
+
+$script = <<<'EOT'
+(function(sacfeed) {
+
+sacfeed['build'] = '%s';
+sacfeed['packages'] = {%s};
+
+})(window.sacfeed);
+EOT;
+
 // packages
 
+$manifest = Config::$manifest['js'];
+
 $packages = [];
-$packageMap = [];
 foreach ($manifest as $package => $files) {
 	$pkg = [];
 	foreach ($files as $file) {
 		$pkg[] = '"' . $file . '"';
-		$packageMap[] = '"' . $file . '": "' . $package . '"';
 	}
 
 	$packages[] = '"' . $package . '": [' . implode(',', $pkg) . ']';
@@ -77,7 +74,7 @@ foreach ($manifest as $package => $files) {
 
 // live.js
 
-$script = sprintf($script, $build, implode(',', $packages), implode(',', $packageMap)) . "\n";
+$script = sprintf($script, $build, implode(',', $packages)) . "\n";
 $tmp = $dir . '/tmp/live.js';
 file_put_contents($tmp, $script);
 
