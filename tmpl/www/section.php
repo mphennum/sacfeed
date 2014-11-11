@@ -51,26 +51,22 @@ foreach ($response['sections'] as $section) {
 <main>
 <?
 
+$titlemap = $response['titleMap'];
+$authormap = $response['authorMap'];
+
+$opts = [
+	'section' => $response['section'],
+	'titlemap' => $titlemap,
+	'authormap' => $authormap
+];
+if (!empty($response['articles'])) {
+	$opts['first'] = $response['articles'][0]['id'];
+	$opts['last'] = $response['articles'][count($response['articles']) - 1]['id'];
+}
+
 $authorURL = 'http://' . Config::IMGHOST . '/v' . Config::VERSION . '.' . Config::MINORVERSION . Config::AUTHORDIR;
 
-$titleMap = $response['titleMap'];
-$authorMap = $response['authorMap'];
-
-$pst = new DateTimeZone('America/Los_Angeles');
-$today = new DateTime('today', $pst);
-$today = $today->getTimestamp();
-
 foreach ($response['articles'] as $article) {
-	// date
-	$dt = new DateTime('@' . ($article['ts'] / 1000), App::$utc);
-	$dt->setTimezone($pst);
-
-	if ($dt->getTimestamp() > $today) {
-		$date = $dt->format('g:i A');
-	} else {
-		$date = $dt->format('l, F j');
-	}
-
 	// thumb
 	if ($article['thumb']) {
 		$thumb = '<p class="sf-thumb"><a href="' . $article['url'] . '"><img src="' . $article['thumb'] . '" alt="' . str_replace('"', '\'', $article['title']) . '"></a></p>' . "\n";
@@ -86,46 +82,49 @@ foreach ($response['articles'] as $article) {
 	$author = trim($author);
 
 	if ($author === '') {
-		foreach ($titleMap as $name => $primary) {
+		foreach ($titlemap as $name => $primary) {
 			if (preg_match('/' . $name . '/i', $article['title'])) {
 				$last = preg_replace('/^.*\s([^\s]+)$/', '$1', $primary);
-				$email = strtolower($primary{0} . $last . '@sacbee.com');
+				$email = strtolower($primary{0} . $last) . '@sacbee.com';
 				$author = $primary . ' ' . $email;
 				break;
 			}
 		}
 	}
 
+	$hasauthorimg = false;
 	if (preg_match('/\s+([^@\s]+@[^@\s]+(?:,\s*[^@\s]+@[^@\s]+)*|the\s*sacramento\s*bee)$/i', $author, $m)) {
 		$author = preg_replace('/\s+(?:[^@\s]+@[^@\s]+(?:,\s*[^@\s]+@[^@\s]+)*|the\s*sacramento\s*bee)$/i', '', $author);
 		$authorLC = strtolower($author);
-		if (isset($authorMap[$authorLC])) {
-			$file = $authorURL . $authorMap[$authorLC] . '.jpg';
+		if (isset($authormap[$authorLC])) {
+			$hasauthorimg = true;
+			$file = $authorURL . $authormap[$authorLC] . '.jpg';
 			$profile = '<img class="sf-profile" src="' . $file . '" alt="' . $author . '">';
-		} else if (preg_match('/^([^,]+)(?:,|\s+and)\s+/', $author, $first) && isset($authorMap[strtolower($first[1])])) {
-			$file = $authorURL . $authorMap[strtolower($first[1])] . '.jpg';
+		} else if (preg_match('/^([^,]+)(?:,|\s+and)\s+/', $author, $first) && isset($authormap[strtolower($first[1])])) {
+			$hasauthorimg = true;
+			$file = $authorURL . $authormap[strtolower($first[1])] . '.jpg';
 			$profile = '<img class="sf-profile" src="' . $file . '" alt="' . $author . '">';
 		}
 
 		$author = '<p class="sf-byline"><span class="sf-name">' . $author . '</span> ' . $m[1] . '</p>';
 	} else if ($author !== '') {
-		$author = '<p class="sf-byline"><span class="sf-name">' . preg_replace('/^the\s/', 'The ', $author) . '</span></p>';
+		$author = '<p class="sf-byline"><span class="sf-name">' . preg_replace('/^the\s+/', 'The ', $author) . '</span></p>';
 	}
 
 ?>
 
-<article>
+<article data-id="<?= $article['id'] ?>">
 <div class="sf-top">
 <?= $thumb ?>
 <h2><a href="<?= $article['url'] ?>"><?= $article['title'] ?></a></h2>
 <p class="sf-summary"><?= htmlentities($article['summary']) ?></p>
 <p><a href="<?= $article['url'] ?>">read more</a></p>
 </div>
-<div class="sf-bottom">
+<div class="sf-bottom<?= $hasauthorimg ? ' sf-author-img' : '' ?>">
 <?= $profile ?>
 <?= $author ?>
 
-<p class="sf-date"><?= $date ?></p>
+<p class="sf-date" data-ts="<?= $article['ts'] ?>"></p>
 </div>
 </article>
 <?php
@@ -141,7 +140,7 @@ foreach ($response['articles'] as $article) {
 (function(sacfeed) {
 
 sacfeed.load('UI.Section', function() {
-	sacfeed.UI.Section().render();
+	sacfeed.UI.Section(<?= json_encode($opts) ?>).render();
 });
 
 })(window.sacfeed);
