@@ -51,6 +51,8 @@ sacfeed.init = function(callback) {
 
 		var $ = sacfeed.$ = window.jQuery;
 		sacfeed.$body = $('body');
+		sacfeed.$header = $('header');
+		sacfeed.$main = $('main');
 
 		// load
 		sacfeed.load = load;
@@ -206,7 +208,8 @@ sacfeed.req = function(crud, req, params, callback) {
 	}
 
 	sacfeed.request(method, uri, params, function(status, headers, responseText) {
-		var resp = JSON.parse(responseText.trim());
+		responseText = responseText.trim() || '{}';
+		var resp = JSON.parse(responseText);
 		if (status.code < 200 || status.code > 299) {
 			var ttl = status.ttl;
 			status = resp;
