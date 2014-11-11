@@ -295,9 +295,13 @@ var load = function(modname, callback) {
 
 		var map = packageMap[modname];
 		if (map) {
-			sacfeed.inc(sacfeed.urls['js'] + map.toLowerCase().replace('.', '/') + '.js', function() {
+			if (sacfeed.modules[map]) {
 				init(modname);
-			});
+			} else {
+				sacfeed.inc(sacfeed.urls['js'] + map.toLowerCase().replace('.', '/') + '.js', function() {
+					init(modname);
+				});
+			}
 		} else {
 			sacfeed.inc(sacfeed.urls['js'] + modname.toLowerCase().replace('.', '/') + '.js', function() {
 				init(modname);
