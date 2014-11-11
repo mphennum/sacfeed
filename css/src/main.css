@@ -42,6 +42,10 @@ article .sf-bottom {
 	padding: 5px;
 }
 
+article .sf-bottom.sf-author-img {
+	min-height: 50px;
+}
+
 article .sf-profile {
 	border-radius: 20px;
 	box-shadow: 0 0 1px 1px #333;
