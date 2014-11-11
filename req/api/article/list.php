@@ -24,14 +24,14 @@ class APIArticleList extends Request {
 			'a' => [ // after
 				'type' => 'int',
 				'default' => null,
-				'min' => 0,
+				'min' => 1,
 				'max' => 999999999,
 				'required' => false
 			],
 			's' => [ // since
 				'type' => 'int',
 				'default' => null,
-				'min' => 0,
+				'min' => 1,
 				'max' => 999999999,
 				'required' => false
 			],
@@ -73,7 +73,7 @@ class APIArticleList extends Request {
 				return false;
 			}
 
-			$find['ts'] = ['$gt' => $article->ts];
+			$find['ts'] = ['$lt' => $article->ts];
 		} else if (isset($this->params['s'])) {
 			$article = new Article();
 			if (!$article->findOne($this->params['s'])) {
@@ -81,7 +81,7 @@ class APIArticleList extends Request {
 				return false;
 			}
 
-			$find['ts'] = ['$lt' => $article->ts];
+			$find['ts'] = ['$gt' => $article->ts];
 		}
 
 		$articles = [];
