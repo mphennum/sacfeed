@@ -29,6 +29,7 @@ class Article extends Record {
 
 	public function getAPIFields() {
 		return [
+			'id' => $this->fields['_id'],
 			'section' => $this->fields['section'],
 			'title' => $this->fields['title'],
 			'subtitle' => $this->fields['subtitle'],
