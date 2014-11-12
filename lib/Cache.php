@@ -52,7 +52,11 @@ abstract class Cache {
 			return true;
 		}
 
-		return self::$memcached->set(self::createKey($key, $params), $value, $ttl);
+		if ($ttl < Config::MICROCACHE) {
+			$ttl = Config::MICROCACHE;
+		}
+
+		return self::$memcached->set(self::createKey($key, $params), $value, $ttl - 1);
 	}
 
 	static public function del($key, $params = [], $queue = true) {
