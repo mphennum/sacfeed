@@ -40,12 +40,11 @@ abstract class Cache {
 	}
 
 	static public function set($key, $params = [], $value, $ttl = Config::SHORTCACHE, $queue = true) {
-		$key = self::createKey($key, $params);
-
 		if ($queue) {
 			self::$queue[] = [
 				'type' => self::SET,
 				'key' => $key,
+				'params' => $params,
 				'value' => $value,
 				'ttl' => $ttl
 			];
@@ -53,22 +52,21 @@ abstract class Cache {
 			return true;
 		}
 
-		return self::$memcached->set($key, $value, $ttl - 1);
+		return self::$memcached->set(self::createKey($key, $params), $value, $ttl);
 	}
 
-	static public function delete($key, $params = [], $queue = true) {
-		$key = self::createKey($key, $params);
-
+	static public function del($key, $params = [], $queue = true) {
 		if ($queue) {
 			self::$queue[] = [
 				'type' => self::DEL,
-				'key' => $key
+				'key' => $key,
+				'params' => $params
 			];
 
 			return true;
 		}
 
-		return self::$memcached->delete($key);
+		return self::$memcached->delete(self::createKey($key, $params));
 	}
 
 	static public function createKey($key, $params = []) {
@@ -81,9 +79,9 @@ abstract class Cache {
 	static public function shutdown() {
 		foreach (self::$queue as $item) {
 			if ($item['type'] === self::SET) {
-				self::$memcached->set($item['key'], $item['value'], $item['ttl']);
+				self::set($item['key'], $item['params'], $item['value'], $item['ttl'], false);
 			} else if ($item['type'] === self::DEL) {
-				self::$memcached->delete($item['key']);
+				self::del($item['key'], $item['params'], false);
 			}
 		}
 	}
