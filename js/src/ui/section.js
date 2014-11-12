@@ -34,6 +34,9 @@ Section.init = function(callback) {
 			this.authormap = opts['authormap'] || {};
 			this.titlemap = opts['titlemap'] || {};
 
+			this.queue = [];
+			this.$queuebtn = sacfeed.$header.find('.sf-queuebtn');
+
 			Ele.prototype.constructor.call(this, opts);
 
 			this.nav = new UI.Nav({
@@ -66,12 +69,34 @@ Section.init = function(callback) {
 			sacfeed.req('read', 'article/list', params, callback || sacfeed.noop);
 		};
 
+		// queue
+
+		var showQueue = function() {
+			var n = (this.queue.length > 9) ? '9+' : this.queue.length;
+			this.$queuebtn.text(n);
+			this.$queuebtn.fadeIn(300);
+		};
+
+		var renderQueue = function() {
+			this.$queuebtn.fadeOut(100);
+
+			for (var i = this.queue.length - 1; i > -1; --i) {
+				renderArticle.call(this, this.queue[i]);
+			}
+
+			this.queue = [];
+		};
+
 		// render
 
 		Section.prototype.render = function() {
 			Ele.prototype.render.call(this);
 
 			this.nav.render();
+
+			this.$queuebtn.click((function() {
+				renderQueue.call(this);
+			}).bind(this));
 
 			sacfeed.$main.find('[data-ts]').each(function() {
 				var $this = $(this);
@@ -87,17 +112,19 @@ Section.init = function(callback) {
 				params['s'] = this.first;
 			}
 
-			setTimeout((function() {
+			setInterval((function() {
 				fetchSince(this.section, this.first, (function(status, headers, resp) {
 					if (status.code !== 200 || !resp.articles) {
 						return;
 					}
 
 					for (var i = resp.articles.length - 1; i > -1; --i) {
-						renderArticle.call(this, resp.articles[i]);
+						this.queue.unshift(resp.articles[i]);
 					}
+
+					showQueue.call(this);
 				}).bind(this));
-			}).bind(this), 1 * 1000);
+			}).bind(this), 90 * 1000);
 
 			return this;
 		};
@@ -160,7 +187,7 @@ Section.init = function(callback) {
 						'<p class="sf-summary">' + article['summary'].entityEncode() + '</p>' +
 						'<p><a href="' + article['url'] + '">read more</a></p>' +
 					'</div>' +
-					'<div class="sf-bottom' + (hasauthorimg ? ' sf-author-img' : '') + '">' +
+					'<div class="sf-bottom' + (hasauthorimg ? ' sf-authorimg' : '') + '">' +
 						profile +
 						author +
 						'<p class="sf-date">' + dt.format(format) + '</p>' +

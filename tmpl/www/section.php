@@ -44,6 +44,8 @@ foreach ($response['sections'] as $section) {
 ?>
 </nav>
 
+<button class="sf-queuebtn" style="display: none"></button>
+
 </div>
 
 </header>
@@ -120,7 +122,7 @@ foreach ($response['articles'] as $article) {
 <p class="sf-summary"><?= htmlentities($article['summary']) ?></p>
 <p><a href="<?= $article['url'] ?>">read more</a></p>
 </div>
-<div class="sf-bottom<?= $hasauthorimg ? ' sf-author-img' : '' ?>">
+<div class="sf-bottom<?= $hasauthorimg ? ' sf-authorimg' : '' ?>">
 <?= $profile ?>
 <?= $author ?>
 
