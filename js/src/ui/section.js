@@ -118,6 +118,10 @@ Section.init = function(callback) {
 						return;
 					}
 
+					if (resp.articles.length) {
+						this.first = resp.articles[0]['id'];
+					}
+
 					for (var i = resp.articles.length - 1; i > -1; --i) {
 						this.queue.unshift(resp.articles[i]);
 					}
