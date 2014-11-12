@@ -17,6 +17,7 @@ for (var k in packages) {
 	}
 }
 
+sacfeed.urls['www'] = '//www.sacfeed.com/';
 sacfeed.urls['js'] = '//js.sacfeed.com/v' +  (sacfeed.devmode ? sacfeed.version + '/src/' : sacfeed.build + '/min/');
 sacfeed.urls['img'] = '//img.sacfeed.com/v' + (sacfeed.devmode ? sacfeed.version : sacfeed.build) + '/';
 sacfeed.urls['authorimg'] = sacfeed.urls['img'] + 'author/';

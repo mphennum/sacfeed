@@ -25,6 +25,8 @@ Nav.init = function(callback) {
 			}
 
 			opts = opts || {};
+			opts['parent'] = opts['parent'] || 'nav';
+			opts['button'] = opts['button'] || '.sf-navbtn';
 
 			Ele.prototype.constructor.call(this, opts);
 
@@ -41,6 +43,19 @@ Nav.init = function(callback) {
 
 		Nav.prototype.render = function() {
 			Ele.prototype.render.call(this);
+
+			if (!this.$.children('a').length) {
+				sacfeed.req('read', 'section/list', null, (function(status, headers, resp) {
+					if (status.code !== 200 || !resp.sections.length) {
+						return;
+					}
+
+					for (var i = 0, n = resp.sections.length; i < n; ++i) {
+						var section = resp.sections[i];
+						this.$.append('<a href="http:' + sacfeed.urls['www'] + section['id'].replace(/^\//, '') + '">' + section['name'] + '</a>');
+					}
+				}).bind(this));
+			}
 
 			this.$button.click((function(event) {
 				this.$.fadeToggle(100);

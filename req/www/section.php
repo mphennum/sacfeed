@@ -36,7 +36,7 @@ class WWWSection extends Request {
 			$section = new Section();
 			if (!$section->findOne($sectionID)) {
 				$this->template = 'error';
-				$this->response->notFound();
+				$this->response->notFound('Section "' . trim($sectionID, '/') . '" was not found');
 				return false;
 			}
 

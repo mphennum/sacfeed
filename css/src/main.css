@@ -26,7 +26,7 @@ article .sf-thumb img {
 	width: 100%;
 }
 
-article h2 a {
+article h2, article h2 a {
 	color: #333;
 	font-size: 16px;
 	font-weight: bold;

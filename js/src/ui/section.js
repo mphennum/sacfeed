@@ -18,6 +18,7 @@ Section.init = function(callback) {
 	sacfeed.load(['UI.Ele', 'UI.Nav'], function() {
 		var format = 'l, F j - g:i A';
 
+		var $ = sacfeed.$;
 		var Ele = UI.Ele;
 
 		Section = UI.Section = function(opts) {
@@ -39,10 +40,7 @@ Section.init = function(callback) {
 
 			Ele.prototype.constructor.call(this, opts);
 
-			this.nav = new UI.Nav({
-				'parent': 'nav',
-				'button': '.sf-navbtn'
-			});
+			this.nav = new UI.Nav();
 
 			return this;
 		}; // Section
