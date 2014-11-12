@@ -39,7 +39,7 @@ abstract class Cache {
 		return self::$memcached->get(self::createKey($key, $params));
 	}
 
-	static public function set($key, $params = [], $value, $ttl = Config::SHORTCACHE, $queue = false) {
+	static public function set($key, $params = [], $value, $ttl = Config::SHORTCACHE, $queue = true) {
 		$key = self::createKey($key, $params);
 
 		if ($queue) {
@@ -56,7 +56,7 @@ abstract class Cache {
 		return self::$memcached->set($key, $value, $ttl - 1);
 	}
 
-	static public function delete($key, $params = [], $queue = false) {
+	static public function delete($key, $params = [], $queue = true) {
 		$key = self::createKey($key, $params);
 
 		if ($queue) {
@@ -72,12 +72,8 @@ abstract class Cache {
 	}
 
 	static public function createKey($key, $params = []) {
-		$key = 'sacfeed:' . $key;
-		foreach ($params as $k => $v) {
-			$key = ':' . $k . '=' . (string) $v;
-		}
-
-		return $key;
+		ksort($params);
+		return 'sacfeed:' . $key . serialize($params);
 	}
 
 	// shutdown
@@ -85,7 +81,7 @@ abstract class Cache {
 	static public function shutdown() {
 		foreach (self::$queue as $item) {
 			if ($item['type'] === self::SET) {
-				self::$memcached->set($item['key'], $item['value'], $item['ttl'] - 1);
+				self::$memcached->set($item['key'], $item['value'], $item['ttl']);
 			} else if ($item['type'] === self::DEL) {
 				self::$memcached->delete($item['key']);
 			}
