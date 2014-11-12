@@ -107,6 +107,7 @@ Section.init = function(callback) {
 			}
 
 			this.queue = [];
+			$('html, body').animate({'scrollTop': 0}, 1000);
 		};
 
 		// render
