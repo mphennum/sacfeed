@@ -2,11 +2,12 @@
 
 namespace Sacfeed;
 
+$version = Config::VERSION . '.' . Config::MINORVERSION;
+
 ?>
-<!--link href="//<?= Config::IMGHOST ?>/favicon.png" rel="shortcut icon"-->
+<link href="//<?= Config::IMGHOST ?>/v<?= $version ?>/favicon.png" rel="shortcut icon">
 <link href="//fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
 <?php
-$version = Config::VERSION . '.' . Config::MINORVERSION;
 if (Config::DEVMODE) {
 	foreach (Config::$manifest['css'] as $package => $files) {
 		foreach ($files as $file) {
