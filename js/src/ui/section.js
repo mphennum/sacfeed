@@ -63,13 +63,17 @@ Section.init = function(callback) {
 
 		var renderAfter = function(status, headers, resp) {
 			if (status.code !== 200 || !resp.articles) {
+				this.more = false;
 				return;
 			}
 
 			var n = resp.articles.length;
-			if (n) {
-				this.last = resp.articles[n - 1]['id'];
+			if (!n) {
+				this.more = false;
+				return;
 			}
+
+			this.last = resp.articles[n - 1]['id'];
 
 			for (var i = 0; i < n; ++i) {
 				renderArticle.call(this, resp.articles[i], true);
