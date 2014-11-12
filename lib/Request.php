@@ -126,8 +126,6 @@ class Request {
 		$format = 'D\, d M Y H:i:s';
 		$nowFormat = $now->format($format) . ' UTC';
 
-		http_response_code($status['code']);
-
 		if ($this->response->cached) {
 			$headers['Date'] = $nowFormat;
 
@@ -147,7 +145,7 @@ class Request {
 						}
 					}
 
-					if ($response === null && $this->method === 'GET') {
+					if ($response === null && $this->method === 'GET' && $status['code'] === 200) {
 						$this->response->noContent();
 						$status = $this->response->status;
 					}
@@ -187,6 +185,8 @@ class Request {
 				], $this->response->ttl);
 			}
 		}
+
+		http_response_code($status['code']);
 
 		foreach ($headers as $k => $v) {
 			header($k . ': ' . $v);

@@ -73,9 +73,9 @@ class Response {
 			$this->status['reason'] = $reason;
 		}
 
-		if ($code > 399 || $code < 200) {
+		if ($code > 399) {
 			$this->result = [];
-			$this->ttl = 0;
+			$this->ttl = Config::MICROCACHE;
 		}
 	}
 
