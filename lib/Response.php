@@ -33,16 +33,21 @@ class Response {
 		509 => 'Bandwidth Limit Exceeded' // out of bandwidth
 	];
 
-	public $result;
+	public $cached;
 	public $status;
+	public $headers;
+	public $result;
 	public $ttl;
 
 	public function __construct() {
-		$this->result = [];
+		$this->cached = false;
 		$this->status = [
 			'code' => 200,
 			'message' => self::$codes[200]
 		];
+
+		$this->headers = [];
+		$this->result = [];
 
 		$this->ttl = 0;
 	}

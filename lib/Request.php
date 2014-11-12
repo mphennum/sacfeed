@@ -25,6 +25,7 @@ class Request {
 		$this->opts = $opts;
 		$this->method = 'GET';
 		$this->params = [];
+		$this->headers = [];
 		$this->response = new Response();
 	}
 
@@ -33,7 +34,9 @@ class Request {
 			return false;
 		}
 
-		if ($this->opts['method'] !== $this->method) {
+		$opts = $this->opts;
+
+		if ($opts['method'] !== $this->method) {
 			$this->response->methodNotAllowed('Only "' . $this->method . '" method allowed for this request');
 			return false;
 		}
@@ -44,7 +47,7 @@ class Request {
 			$this->response->accepted();
 		}
 
-		$params = $this->opts['params'];
+		$params = $opts['params'];
 		foreach ($params as $key => $param) {
 			if (!isset($this->params[$key])) {
 				$this->response->notAcceptable('Parameter "' . $key . '" not allowed in this context');
@@ -97,73 +100,97 @@ class Request {
 			$this->params[$key] = $value;
 		}
 
+		if ($opts['method'] === 'GET') {
+			$cache = self::getCache($opts['host'], $opts['resource'], $opts['action'], $opts['params']);
+			if ($cache !== false) {
+				$this->response->cached = true;
+				$this->response->status = $cache['status'];
+				$this->response->headers = $cache['headers'];
+				$this->response->result = $cache['result'];
+				return false;
+			}
+		}
+
 		return true;
 	}
 
 	public function view() {
 		$opts = $this->opts;
-		$result = $this->response->result;
 		$status = $this->response->status;
+		$headers = $this->response->headers;
+		$result = $this->response->result;
 
 		$api = ($opts['host'] === App::API);
-		if ($api) {
-			if ($status['code'] < 300) {
-				$empty = true;
-				foreach ($result as $resource) {
-					if (!is_array($resource) || !empty($resource)) {
-						$empty = false;
-						$response = $result;
-						break;
-					}
-				}
-
-				if ($empty) {
-					if ($this->method === 'GET') {
-						$this->response->noContent();
-						$status = $this->response->status;
-					}
-
-					$response = null;
-				}
-			} else {
-				$response = $status;
-				if ($status['code'] === 405) {
-					$headers[] = 'Allow: GET, HEAD';
-				} else if ($status['code'] === 301) {
-					$headers[] = 'Location: ' . $result['location'];
-				}
-			}
-		} else {
-			$response = $result;
-		}
 
 		$now = new DateTime('now', App::$utc);
 		$format = 'D\, d M Y H:i:s';
 		$nowFormat = $now->format($format) . ' UTC';
 
 		http_response_code($status['code']);
-		$headers = [
-			//'Content-Language: en-us',
-			'Date: ' . $nowFormat
-		];
 
-		if ($this->response->ttl === 0) {
-			$headers[] = 'Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0';
-			$headers[] = 'Pragma: no-cache';
-			$headers[] = 'Expires: Mon, 1 Jan 1970 00:00:00 UTC';
+		if ($this->response->cached) {
+			$headers['Date'] = $nowFormat;
+
+			$expires = new DateTime($headers['Expires'], App::$utc);
+			$duration = $expires->getTimestamp() - $now->getTimestamp();
+			$headers['Cache-Control'] = 'public, max-age=' . $duration;
+
+			$response = $result;
 		} else {
-			$duration = $this->response->ttl - 1;
-			$date = new DateTime('now', App::$utc);
-			$date->setTimestamp($now->getTimestamp() + $duration);
+			if ($api) {
+				if ($status['code'] < 300) {
+					$response = null;
+					foreach ($result as $resource) {
+						if (!is_array($resource) || !empty($resource)) {
+							$response = $result;
+							break;
+						}
+					}
 
-			$headers[] = 'Last-Modified: ' . $nowFormat;
-			$headers[] = 'Cache-Control: public, max-age=' . $duration;
-			$headers[] = 'Pragma: cache';
-			$headers[] = 'Expires: ' . $date->format($format) . ' UTC';
+					if ($response === null && $this->method === 'GET') {
+						$this->response->noContent();
+						$status = $this->response->status;
+					}
+				} else {
+					$response = $status;
+					if ($status['code'] === 405) {
+						$headers['Allow'] = 'GET, HEAD';
+					} else if ($status['code'] === 301) {
+						$headers['Location'] = $result['location'];
+					}
+				}
+			} else {
+				$response = $result;
+			}
+
+			//$headers['Content-Language'] = 'en-us';
+			$headers['Date'] = $nowFormat;
+
+			if ($this->response->ttl < 1) {
+				$headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0';
+				$headers['Pragma'] = 'no-cache';
+				$headers['Expires'] = 'Mon, 1 Jan 1970 00:00:00 UTC';
+			} else {
+				$duration = $this->response->ttl;
+				$date = new DateTime('now', App::$utc);
+				$date->setTimestamp($now->getTimestamp() + $duration);
+
+				$headers['Last-Modified'] = $nowFormat;
+				$headers['Cache-Control'] = 'public, max-age=' . $duration;
+				$headers['Pragma'] = 'cache';
+				$headers['Expires'] = $date->format($format) . ' UTC';
+
+				// set cache here
+				self::setCache($opts['host'], $opts['resource'], $opts['action'], $opts['params'], [
+					'status' => $status,
+					'headers' => $headers,
+					'result' => $response
+				], $this->response->ttl);
+			}
 		}
 
-		foreach ($headers as $header) {
-			header($header);
+		foreach ($headers as $k => $v) {
+			header($k . ': ' . $v);
 		}
 
 		ob_start('ob_gzhandler');
@@ -184,6 +211,18 @@ class Request {
 
 		return $output;
 	}
+
+	// cache
+
+	static public function getCache($host, $resource, $action, $params = []) {
+		return Cache::get((string) $host . '|' . $resource . '/' . $action, $params);
+	}
+
+	static public function setCache($host, $resource, $action, $params = [], $value, $ttl) {
+		return Cache::set((string) $host . '|' . $resource . '/' . $action, $params, $value, $ttl, true);
+	}
+
+	// factory
 
 	static public function factory($opts = []) {
 		$opts['action'] = isset(self::$actions[$opts['method']]) ? self::$actions[$opts['method']] : null;
@@ -223,6 +262,14 @@ class Request {
 			return $request;
 		}
 
+		// invalid method
+		if ($opts['method'] !== 'GET') {
+			$request = new Request($opts);
+			$request->template = $opts['format'];
+			$request->response->methodNotAllowed('Only GET permitted');
+			return $request;
+		}
+
 		// no resource
 		if ($opts['resource'] === '') {
 			$request = new Request($opts);
@@ -255,14 +302,6 @@ class Request {
 			}
 
 			$opts['action'] = implode('/', $resource);
-		}
-
-		// invalid method
-		if ($opts['method'] !== 'GET') {
-			$request = new Request($opts);
-			$request->template = $opts['format'];
-			$request->response->methodNotAllowed('Only GET permitted');
-			return $request;
 		}
 
 		// invalid resource
@@ -333,12 +372,13 @@ class Request {
 		if (isset(self::$requests[$file])) {
 			$class = 'Sacfeed\\WWW\\' . self::$requests[$file];
 			if ($opts['resource'] === '/' || $opts['resource'] === '') {
-				$resource = '/';
+				$section = '/';
 			} else {
-				$resource = '/' . $opts['resource'] . '/';
+				$section = '/' . $opts['resource'] . '/';
 			}
 
-			$opts['params'] = ['section' => $resource];
+			$opts['resource'] = 'section';
+			$opts['params'] = ['section' => $section];
 			$request = new $class($opts);
 			$request->template = 'section';
 			return $request;
@@ -349,6 +389,8 @@ class Request {
 		$request->response->notFound();
 		return $request;
 	}
+
+	// params
 
 	static public function decodeParam($param) {
 		$param = rawurldecode($param);
