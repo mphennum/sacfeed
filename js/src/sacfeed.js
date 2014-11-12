@@ -53,6 +53,8 @@ sacfeed.init = function(callback) {
 		}
 
 		var $ = sacfeed.$ = window.jQuery;
+		sacfeed.$window = $(window);
+		sacfeed.$document = $(document);
 		sacfeed.$body = $('body');
 		sacfeed.$header = $('header');
 		sacfeed.$main = $('main');

@@ -19,6 +19,8 @@ Section.init = function(callback) {
 		var format = 'l, F j - g:i A';
 
 		var $ = sacfeed.$;
+		var $window = sacfeed.$window;
+		var $document = sacfeed.$document;
 		var Ele = UI.Ele;
 
 		Section = UI.Section = function(opts) {
@@ -35,6 +37,7 @@ Section.init = function(callback) {
 			this.authormap = opts['authormap'] || {};
 			this.titlemap = opts['titlemap'] || {};
 
+			this.more = true;
 			this.queue = [];
 			this.$queuebtn = sacfeed.$header.find('.sf-queuebtn');
 
@@ -47,27 +50,48 @@ Section.init = function(callback) {
 
 		Section.prototype = Object.create(Ele.prototype);
 
-		// fetch
+		// after
 
-		var fetchAfter = function(section, after, callback) {
-			var params = {'section': section};
-			if (after) {
-				params['a'] = after;
+		var fetchAfter = function(callback) {
+			var params = {'section': this.section};
+			if (this.last) {
+				params['a'] = this.last;
 			}
 
 			sacfeed.req('read', 'article/list', params, callback || sacfeed.noop);
 		};
 
-		var fetchSince = function(section, since, callback) {
-			var params = {'section': section};
-			if (since) {
-				params['s'] = since;
+		var renderAfter = function(status, headers, resp) {
+			if (status.code !== 200 || !resp.articles) {
+				return;
+			}
+
+			var n = resp.articles.length;
+			if (n) {
+				this.last = resp.articles[n - 1]['id'];
+			}
+
+			for (var i = 0; i < n; ++i) {
+				renderArticle.call(this, resp.articles[i], true);
+			}
+		};
+
+		var scroll = function() {
+			if ($window.scrollTop() + $window.height() > $document.height() - 1000) {
+				fetchAfter.call(this, renderAfter.bind(this));
+			}
+		};
+
+		// since
+
+		var fetchSince = function(callback) {
+			var params = {'section': this.section};
+			if (this.first) {
+				params['s'] = this.first;
 			}
 
 			sacfeed.req('read', 'article/list', params, callback || sacfeed.noop);
 		};
-
-		// queue
 
 		var showQueue = function() {
 			var n = (this.queue.length > 9) ? '9+' : this.queue.length;
@@ -79,7 +103,7 @@ Section.init = function(callback) {
 			this.$queuebtn.fadeOut(100);
 
 			for (var i = this.queue.length - 1; i > -1; --i) {
-				renderArticle.call(this, this.queue[i]);
+				renderArticle.call(this, this.queue[i], false);
 			}
 
 			this.queue = [];
@@ -110,28 +134,39 @@ Section.init = function(callback) {
 				params['s'] = this.first;
 			}
 
-			setInterval((function() {
-				fetchSince(this.section, this.first, (function(status, headers, resp) {
-					if (status.code !== 200 || !resp.articles) {
-						return;
-					}
+			setInterval(fetchSince.bind(this, (function(status, headers, resp) {
+				if (status.code !== 200 || !resp.articles) {
+					return;
+				}
 
-					if (resp.articles.length) {
-						this.first = resp.articles[0]['id'];
-					}
+				if (resp.articles.length) {
+					this.first = resp.articles[0]['id'];
+				}
 
-					for (var i = resp.articles.length - 1; i > -1; --i) {
-						this.queue.unshift(resp.articles[i]);
-					}
+				for (var i = resp.articles.length - 1; i > -1; --i) {
+					this.queue.unshift(resp.articles[i]);
+				}
 
-					showQueue.call(this);
-				}).bind(this));
-			}).bind(this), 90 * 1000);
+				showQueue.call(this);
+			}).bind(this)), 90 * 1000);
+
+			var scrolltimer;
+			$window.scroll((function() {
+				if (!this.more) {
+					return;
+				}
+
+				if (scrolltimer) {
+					clearTimeout(scrolltimer);
+				}
+
+				scrolltimer = setTimeout(scroll.bind(this), 300);
+			}).bind(this));
 
 			return this;
 		};
 
-		var renderArticle = function(article) {
+		var renderArticle = function(article, post) {
 			var dt = new Date(article['ts']);
 
 			var profile = '';
@@ -197,7 +232,12 @@ Section.init = function(callback) {
 				'</article>'
 			);
 
-			sacfeed.$main.prepend($article);
+			if (post) {
+				sacfeed.$main.append($article);
+			} else {
+				sacfeed.$main.prepend($article);
+			}
+
 			$article.fadeIn(300);
 		};
 
