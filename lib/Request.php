@@ -180,7 +180,6 @@ class Request {
 				$headers['Pragma'] = 'cache';
 				$headers['Expires'] = $date->format($format) . ' UTC';
 
-				// set cache here
 				self::setCache($opts['host'], $opts['resource'], $opts['action'], $opts['params'], [
 					'status' => $status,
 					'headers' => $headers,
