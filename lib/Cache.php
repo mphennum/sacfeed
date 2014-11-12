@@ -73,7 +73,7 @@ abstract class Cache {
 
 	static public function createKey($key, $params = []) {
 		ksort($params);
-		return 'sacfeed:' . $key . serialize($params);
+		return 'sacfeed|' . $key . '|' . serialize($params);
 	}
 
 	// shutdown
