@@ -68,7 +68,7 @@ class WWWSection extends Request {
 			}
 		}
 
-		$this->response->ttl = Config::LONGCACHE;
+		$this->response->ttl = Config::MEDIUMCACHE;
 		$this->response->result['section'] = $sectionID;
 		$this->response->result['sections'] = $sections;
 		$this->response->result['articles'] = $articles;
