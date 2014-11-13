@@ -52,6 +52,8 @@ Section.init = function(callback) {
 
 		// after
 
+		var loadingAfter = false;
+
 		var fetchAfter = function(callback) {
 			var params = {'section': this.section};
 			if (this.last) {
@@ -78,10 +80,13 @@ Section.init = function(callback) {
 			for (var i = 0; i < n; ++i) {
 				renderArticle.call(this, resp.articles[i], true);
 			}
+
+			loadingAfter = false;
 		};
 
 		var scroll = function() {
-			if ($window.scrollTop() + $window.height() > $document.height() - 1000) {
+			if ($window.scrollTop() + $window.height() > $document.height() - 1000 && !loadingAfter) {
+				loadingAfter = true;
 				fetchAfter.call(this, renderAfter.bind(this));
 			}
 		};

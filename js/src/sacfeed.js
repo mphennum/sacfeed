@@ -9,12 +9,24 @@ if (sacfeed.modules['sacfeed']) {
 // vars
 
 var packages = sacfeed.packages = sacfeed.packages || {};
-var packageMap = sacfeed.packageMap = {};
+var packagemap = sacfeed.packagemap = {};
 for (var k in packages) {
 	var pkg = packages[k];
 	for (var i = 0, n = pkg.length; i < n; ++i) {
-		packageMap[pkg[i]] = k;
+		packagemap[pkg[i]] = k;
 	}
+}
+
+var crudmap = {
+	'create': 'POST',
+	'read': 'GET',
+	'update': 'PUT',
+	'delete': 'DELETE'
+};
+
+var methodmap = {};
+for (var k in crudmap) {
+	methodmap[crudmap[k]] = k;
 }
 
 sacfeed.urls['www'] = '//www.sacfeed.com/';
@@ -41,7 +53,7 @@ sacfeed.init = function(callback) {
 		required.unshift('//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js');
 	}
 
-	var analyticsMap = {
+	var analyticsmap = {
 		'ga': 'Ext.GA'
 	};
 
@@ -143,7 +155,9 @@ sacfeed.init = function(callback) {
 				xdr.send();
 			};
 		} else { // jsonp fallback
-			sacfeed.request = sacfeed.noop;
+			sacfeed.request = function(method, url, params, callback) {
+				callback({}, {}, '');
+			};
 		}
 
 		// delayed
@@ -160,7 +174,7 @@ sacfeed.init = function(callback) {
 
 		// analytics
 		for (var i = 0, n = sacfeed.analytics.length; i < n; ++i) {
-			var analytic = analyticsMap[sacfeed.analytics[i]];
+			var analytic = analyticsmap[sacfeed.analytics[i]];
 			if (!analytic) {
 				throw new Error('Invalid analytics item "' + sacfeed.analytics[i] + '"');
 			}
@@ -185,17 +199,10 @@ sacfeed.init = function(callback) {
 
 // api request
 
-var crudMap = {
-	'create': 'POST',
-	'read': 'GET',
-	'update': 'PUT',
-	'delete': 'DELETE'
-};
-
 sacfeed.req = function(crud, req, params, callback) {
 	callback = callback || sacfeed.noop;
 
-	var method = crudMap[crud];
+	var method = crudmap[crud];
 	if (method !== 'GET') {
 		throw new Error('CRUD action "' + crud + '" not allowed for sacfeed api requests');
 	}
@@ -301,7 +308,7 @@ var load = function(modname, callback) {
 	} else {
 		listen[modname] = [callback];
 
-		var map = packageMap[modname];
+		var map = packagemap[modname];
 		if (map) {
 			if (sacfeed.modules[map]) {
 				init(modname);
