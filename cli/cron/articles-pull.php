@@ -15,6 +15,7 @@ CLI::init(__FILE__, 'Sacfeed -- pull new articles cli');
 $ts = new MongoDate();
 $ts->sec -= 60 * 60 * 3;
 
+// make sure ttl is the same as article-clean.php
 $old = new MongoDate();
 $old->sec -= 60 * 60 * 24 * 7;
 
@@ -65,7 +66,4 @@ foreach ($cursor as $record) {
 	}
 }
 
-Database::remove(Article::COLLECTION, ['ts' => ['$lt' => $old]], 0, true);
-
-CLI::notice('Old articles (7 days) have been removed');
 CLI::notice($n . ' articles inserted');
