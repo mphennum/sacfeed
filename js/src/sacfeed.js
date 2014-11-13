@@ -229,7 +229,7 @@ sacfeed.req = function(crud, req, params, callback) {
 // random ID
 
 sacfeed.randID = function() {
-	return Math.floor(Math.random() * 0x7FFFFFFF).toString(16);
+	return Math.floor(Math.random() * 0x7FFFFFFF).toString(36);
 };
 
 // load module(s)
