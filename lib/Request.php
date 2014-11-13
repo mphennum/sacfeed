@@ -192,6 +192,10 @@ class Request {
 			header($k . ': ' . $v);
 		}
 
+		if (!$api && $status['code'] > 399) {
+			$this->template = 'error';
+		}
+
 		ob_start('ob_gzhandler');
 		include __DIR__ . '/../tmpl/' . ($api ? 'api/' : 'www/') . $this->template . '.php';
 
@@ -344,21 +348,12 @@ class Request {
 
 		if ($opts['action'] !== 'read') {
 			$request = new Request($opts);
-			$request->template = 'error';
 			$request->response->methodNotAllowed();
 			return $request;
 		}
 
-		if ($opts['format'] !== null) {
+		if ($opts['format'] !== null || !empty($opts['params'])) {
 			$request = new Request($opts);
-			$request->template = 'error';
-			$request->response->notFound();
-			return $request;
-		}
-
-		if (!empty($opts['params'])) {
-			$request = new Request($opts);
-			$request->template = 'error';
 			$request->response->notFound();
 			return $request;
 		}
@@ -384,7 +379,6 @@ class Request {
 		}
 
 		$request = new Request($opts);
-		$request->template = 'error';
 		$request->response->notFound();
 		return $request;
 	}
