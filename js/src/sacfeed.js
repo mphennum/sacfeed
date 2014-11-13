@@ -79,6 +79,35 @@ sacfeed.init = function(callback) {
 			sacfeed.request = function(method, url, params, callback) {
 				callback = callback || sacfeed.noop;
 
+				var get = (method === 'GET' || method === 'DELETE');
+
+				url = url.replace(/\?.*$/, '');
+				var post = null;
+				if (params && Object.keys(params).length) {
+					var query = [];
+					for (var k in params) {
+						var v = params[k];
+						var key = encodeURIComponent(k);
+						if (v === true) {
+							query.push(key);
+						} else {
+							var val = encodeURIComponent(v);
+							if (v instanceof Array) {
+								val = get ? '%5B' + val + '%5D' : '[' + val + ']';
+							}
+
+							query.push(key + '=' + val);
+						}
+					}
+
+					query = query.join('&');
+					if (get) {
+						url += '?' + query;
+					} else {
+						post = query;
+					}
+				}
+
 				var xhr = new XMLHttpRequest();
 				xhr.open(method, url, true);
 
@@ -127,7 +156,7 @@ sacfeed.init = function(callback) {
 					callback(status, headers, xhr.responseText);
 				}; // xhr.onreadystatechange
 
-				xhr.send(null);
+				xhr.send(post);
 			}; // sacfeed.request
 		} else if (sacfeed.Detect.XDR) {
 			sacfeed.request = function(method, url, params, callback) {
@@ -208,16 +237,6 @@ sacfeed.req = function(crud, req, params, callback) {
 	}
 
 	var uri = sacfeed.urls['api'] + req; // + '.json';
-	if (method === 'GET' || method === 'DELETE') {
-		var query = [];
-		for (var k in params) {
-			query.push(encodeURIComponent(k) + '=' + encodeURIComponent(params[k]));
-		}
-
-		if (query.length) {
-			uri += '?' + query.join('&');
-		}
-	}
 
 	sacfeed.request(method, uri, params, function(status, headers, responseText) {
 		responseText = responseText.trim() || '{}';
