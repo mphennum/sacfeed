@@ -153,7 +153,7 @@ Section.init = function(callback) {
 				}
 
 				showQueue.call(this);
-			}).bind(this)), 90 * 1000);
+			}).bind(this)), 180 * 1000);
 
 			var scrolltimer;
 			$window.scroll((function() {
