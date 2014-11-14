@@ -64,13 +64,13 @@ Section.init = function(callback) {
 		};
 
 		var renderAfter = function(resp) {
-			if (resp.status.code !== 200 || !resp.result.articles || !resp.articles.length) {
+			if (resp.status.code !== 200 || !resp.result.articles || !resp.result.articles.length) {
 				this.more = false;
 				return;
 			}
 
 			var n = resp.result.articles.length;
-			this.last = resp.articles[n - 1]['id'];
+			this.last = resp.result.articles[n - 1]['id'];
 
 			for (var i = 0; i < n; ++i) {
 				renderArticle.call(this, resp.result.articles[i], true);
