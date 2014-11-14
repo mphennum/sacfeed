@@ -15,6 +15,13 @@ class Request {
 		'DELETE' => 'delete'
 	];
 
+	static public $methods = [
+		'r' => 'GET',
+		'c' => 'POST',
+		'u' => 'PUT',
+		'd' => 'DELETE'
+	];
+
 	public $opts;
 	public $method;
 	public $params;
@@ -192,8 +199,14 @@ class Request {
 			header($k . ': ' . $v);
 		}
 
-		if (!$api && $status['code'] > 399) {
-			$this->template = 'error';
+		if ($api) {
+			if ($this->template === 'jsonp') {
+				$callback = $opts['callback'];
+			}
+		} else {
+			if ($status['code'] > 399) {
+				$this->template = 'error';
+			}
 		}
 
 		ob_start('ob_gzhandler');
@@ -263,6 +276,32 @@ class Request {
 			$request->template = $opts['format'];
 			$request->response->badRequest('Invalid version');
 			return $request;
+		}
+
+		// set callback for jsonp
+		if ($opts['format'] === 'jsonp') {
+			if (!array_key_exists('c', $opts['params'])) {
+				$request = new Request($opts);
+				$request->template = 'xdr'; // closest to jsonp
+				$request->response->conflict('Must use callback (c) param for jsonp');
+				return $request;
+			}
+
+			$opts['callback'] = self::forceString($opts['params']['c']);
+			unset($opts['params']['c']);
+		}
+
+		// swap method for m param in xdr and jsonp
+		if (($opts['format'] === 'xdr' || $opts['format'] === 'jsonp') && isset($opts['params']['m'])) {
+			if (!isset(self::$methods[$opts['params']['m']])) {
+				$request = new Request($opts);
+				$request->template = $opts['format'];
+				$request->response->methodNotAllowed('Unknown method "' . $opts['params']['m'] . '"');
+				return $request;
+			}
+
+			$opts['method'] = self::$methods[$opts['params']['m']];
+			unset($opts['params']['m']);
 		}
 
 		// invalid method
@@ -418,5 +457,25 @@ class Request {
 		}
 
 		return $param;
+	}
+
+	static public function forceString($param) {
+		if ($param === null) {
+			return 'null';
+		}
+
+		if ($param === false) {
+			return 'false';
+		}
+
+		if ($param === true) {
+			return 'true';
+		}
+
+		if (is_array($param)) {
+			return 'array';
+		}
+
+		return (string) $param;
 	}
 }

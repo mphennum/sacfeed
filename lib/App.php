@@ -31,22 +31,6 @@ abstract class App {
 		$opts['origin'] = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : null;
 		$opts['method'] = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : null;
 
-		if ($opts['host'] === self::API) {
-			$origin = isset($opts['origin']) ? $opts['origin'] : null;
-			if (!Config::DEVMODE && $origin !== 'http://' . Config::WWWHOST) {
-				// return an error
-				exit(0);
-			}
-
-			header('Access-Control-Allow-Origin: http://' . Config::WWWHOST);
-
-			if ($opts['method'] === 'OPTIONS') {
-				header('Access-Control-Max-Age: 3600');
-				header('Access-Control-Allow-Methods: GET, HEAD, OPTIONS');
-				exit(0);
-			}
-		}
-
 		//$opts['ip'] = isset($_COOKIE['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : null;
 		//$opts['agent'] = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null;
 		$opts['secure'] = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
@@ -65,6 +49,22 @@ abstract class App {
 			$opts['params'] = $_POST;
 		} else {
 			$opts['params'] = $_GET;
+		}
+
+		if ($opts['host'] === self::API) {
+			$origin = isset($opts['origin']) ? $opts['origin'] : null;
+			if (!Config::DEVMODE && $origin !== 'http://' . Config::WWWHOST) {
+				// return an error
+				exit(0);
+			}
+
+			header('Access-Control-Allow-Origin: http://' . Config::WWWHOST);
+
+			if ($opts['method'] === 'OPTIONS') {
+				header('Access-Control-Max-Age: 3600');
+				header('Access-Control-Allow-Methods: GET, HEAD, OPTIONS');
+				exit(0);
+			}
 		}
 
 		$request = Request::factory($opts);
