@@ -67,5 +67,6 @@ article .sf-name {
 }
 
 article .sf-date {
+	min-height: 14px;
 	margin-bottom: 3px;
 }
