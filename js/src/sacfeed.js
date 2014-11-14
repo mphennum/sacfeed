@@ -218,7 +218,7 @@ sacfeed.init = function(callback) {
 				callback = callback || sacfeed.noop;
 
 				var method = crudmap[crud];
-				var url = sacfeed.urls['api'] + uri.replace(/\?.*$/, '').replace(/\.[^\/]*$/, '');
+				var url = sacfeed.urls['api'] + uri.replace(/\?.*$/, '').replace(/\.[^\/]*$/, '') + '.xdr';
 
 				// xdr can only use GET and POST methods
 				if (method === 'DELETE') {

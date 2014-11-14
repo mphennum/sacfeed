@@ -264,7 +264,67 @@ Poly.init = function(callback) {
 		return format.replace(/\{\{|\}\}/g, '');
 	};
 
+	// Object
+
+	Object.create = Object.create || (function() {
+		var Object = function() {};
+		return function(prototype) {
+			if (arguments.length > 1) {
+				throw new Error('Second argument not supported');
+			}
+
+			if (typeof prototype !== 'object') {
+				throw new TypeError('Argument must be an object');
+			}
+
+			Object.prototype = prototype;
+			var result = new Object();
+			Object.prorotype = null;
+			return result;
+		};
+	})();
+
+	Object.keys = Object.keys || (function() {
+		var hasOwnProperty = Object.prototype.hasOwnProperty;
+		var hasDontEnumBug = !({'toString': null}).propertyIsEnumerable('toString');
+		var dontEnums = [
+			'toString',
+			'toLocaleString',
+			'valueOf',
+			'hasOwnProperty',
+			'isPrototypeOf',
+			'propertyIsEnumerable',
+			'constructor'
+		];
+
+		var n = dontEnums.length;
+
+		return function(obj) {
+			if (typeof obj !== 'object' && (typeof obj !== 'function' || obj === null)) {
+				throw new TypeError('Object.keys called on non-object');
+			}
+
+			var result = [];
+
+			for (var prop in obj) {
+				if (hasOwnProperty.call(obj, prop)) {
+					result.push(prop);
+				}
+			}
+
+			if (hasDontEnumBug) {
+				for (var i = 0; i < n; i++) {
+					if (hasOwnProperty.call(obj, dontEnums[i])) {
+						result.push(dontEnums[i]);
+					}
+				}
+			}
+
+			return result;
+		};
+	})();
+
 	callback();
 };
 
-})(window.sacfeed, Number.prototype, String.prototype, Function.prototype, Date.prototype);
+})(window.sacfeed, Number.prototype, String.prototype, Function.prototype, Date.prototype, Object);
