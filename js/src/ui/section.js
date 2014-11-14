@@ -163,7 +163,7 @@ Section.init = function(callback) {
 					clearTimeout(scrolltimer);
 				}
 
-				scrolltimer = setTimeout(scroll.bind(this), 300);
+				scrolltimer = setTimeout(scroll.bind(this), 100);
 			}).bind(this));
 
 			return this;
