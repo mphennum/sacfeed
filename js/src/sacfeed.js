@@ -34,10 +34,9 @@ sacfeed.urls['js'] = sacfeed.protocol + '//js.sacfeed.com/v' +  (sacfeed.devmode
 sacfeed.urls['img'] = sacfeed.protocol + '//img.sacfeed.com/v' + (sacfeed.devmode ? sacfeed.version : sacfeed.build) + '/';
 sacfeed.urls['authorimg'] = sacfeed.urls['img'] + 'author/';
 
-sacfeed.callbacks = {};
-
 // request
 
+sacfeed.callbacks = {};
 var cache = {};
 
 var query = function(params) {
@@ -213,7 +212,7 @@ sacfeed.init = function(callback) {
 
 				xhr.send(post);
 			}; // sacfeed.req
-		} else if (sacfeed.Detect.XDR) {
+		} else if (sacfeed.Detect.XDR) { // xdr for ie8 & 9
 			sacfeed.req = function(crud, uri, params, callback) {
 				callback = callback || sacfeed.noop;
 
@@ -285,7 +284,64 @@ sacfeed.init = function(callback) {
 			}; // sacfeed.req
 		} else { // jsonp fallback
 			sacfeed.req = function(crud, uri, params, callback) {
-				callback({}, {}, '');
+				callback = callback || sacfeed.noop;
+
+				var method = crudmap[crud];
+				var url = sacfeed.urls['api'] + uri.replace(/\?\.*$/, '').replace(/\.[^\/]*$/, '') + '.jsonp';
+
+				if (method === 'POST') {
+					params = params || {};
+					params['m'] = 'c';
+				} else if (method === 'PUT') {
+					params = params || {};
+					params['m'] = 'u';
+				} else if (method === 'DELETE') {
+					params = params || {};
+					params['m'] = 'd';
+				}
+
+				method = 'GET';
+
+				var post = null;
+				var id = sacfeed.randID();
+
+				params = query(params);
+				var cburl;
+				if (params) {
+					url += '?' + params;
+					cburl = url + '&';
+				} else {
+					cburl += url + '?';
+				}
+
+				cburl += 'c=' + encodeURIComponent(id);
+
+				if (crud === 'read' && cache[url]) {
+					var dt = new Date();
+					if  (cache[url]['expires'] > dt.getTime()) {
+						callback(cache[url]['resp']);
+						return;
+					}
+
+					delete cache[url];
+				}
+
+				sacfeed.callbacks[id] = function(resp) {
+					delete sacfeed.callbacks[id];
+
+					var ttl = resp.status.ttl;
+					if (crud === 'read' && ttl > 0) {
+						var dt = new Date();
+						cache[url] = {
+							'resp': resp,
+							'expires': dt.getTime() + ttl * 1000
+						};
+					}
+
+					callback(resp);
+				};
+
+				sacfeed.inc(cburl);
 			}; // sacfeed.req
 		}
 
