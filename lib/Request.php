@@ -175,6 +175,8 @@ class Request {
 				$headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0';
 				$headers['Pragma'] = 'no-cache';
 				$headers['Expires'] = 'Mon, 1 Jan 1970 00:00:00 UTC';
+
+				$duration = 0;
 			} else {
 				$duration = $this->response->ttl;
 				$date = new DateTime('now', App::$utc);
@@ -192,6 +194,8 @@ class Request {
 				], $this->response->ttl);
 			}
 		}
+
+		$status['ttl'] = $duration;
 
 		http_response_code($status['code']);
 
