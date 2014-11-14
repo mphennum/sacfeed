@@ -45,14 +45,14 @@ Nav.init = function(callback) {
 			Ele.prototype.render.call(this);
 
 			if (!this.$.children('a').length) {
-				sacfeed.req('read', 'section/list', null, (function(status, headers, resp) {
-					if (status.code !== 200 || !resp.sections.length) {
+				sacfeed.req('read', 'section/list', null, (function(resp) {
+					if (resp.status.code !== 200 || !resp.result.sections || !resp.result.sections.length) {
 						return;
 					}
 
-					for (var i = 0, n = resp.sections.length; i < n; ++i) {
-						var section = resp.sections[i];
-						this.$.append('<a href="http:' + sacfeed.urls['www'] + section['id'].replace(/^\//, '') + '">' + section['name'] + '</a>');
+					for (var i = 0, n = resp.result.sections.length; i < n; ++i) {
+						var section = resp.result.sections[i];
+						this.$.append('<a href="' + sacfeed.urls['www'] + section['id'].replace(/^\//, '') + '">' + section['name'] + '</a>');
 					}
 				}).bind(this));
 			}

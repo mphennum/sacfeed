@@ -29,10 +29,40 @@ for (var k in crudmap) {
 	methodmap[crudmap[k]] = k;
 }
 
-sacfeed.urls['www'] = '//www.sacfeed.com/';
-sacfeed.urls['js'] = '//js.sacfeed.com/v' +  (sacfeed.devmode ? sacfeed.version + '/src/' : sacfeed.build + '/min/');
-sacfeed.urls['img'] = '//img.sacfeed.com/v' + (sacfeed.devmode ? sacfeed.version : sacfeed.build) + '/';
+sacfeed.urls['www'] = sacfeed.protocol + '//www.sacfeed.com/';
+sacfeed.urls['js'] = sacfeed.protocol + '//js.sacfeed.com/v' +  (sacfeed.devmode ? sacfeed.version + '/src/' : sacfeed.build + '/min/');
+sacfeed.urls['img'] = sacfeed.protocol + '//img.sacfeed.com/v' + (sacfeed.devmode ? sacfeed.version : sacfeed.build) + '/';
 sacfeed.urls['authorimg'] = sacfeed.urls['img'] + 'author/';
+
+sacfeed.callbacks = {};
+
+// request
+
+var cache = {};
+
+var query = function(params) {
+	if (!params || !Object.keys(params).length) {
+		return false;
+	}
+
+	var query = [];
+	for (var k in params) {
+		var v = params[k];
+		var key = encodeURIComponent(k);
+		if (v === true) {
+			query.push(key);
+		} else {
+			var val = encodeURIComponent(v);
+			if (v instanceof Array) {
+				val = get ? '%5B' + val + '%5D' : '[' + val + ']';
+			}
+
+			query.push(key + '=' + val);
+		}
+	}
+
+	return query.join('&');
+};
 
 // init
 
@@ -76,36 +106,31 @@ sacfeed.init = function(callback) {
 
 		// request
 		if (sacfeed.Detect.XHR) {
-			sacfeed.request = function(method, url, params, callback) {
+			sacfeed.req = function(crud, uri, params, callback) {
 				callback = callback || sacfeed.noop;
 
+				var method = crudmap[crud];
 				var get = (method === 'GET' || method === 'DELETE');
+				var url = sacfeed.urls['api'] + uri.replace(/\?.*$/, '').replace(/\.[^\/]*$/, '');
 
-				url = url.replace(/\?.*$/, '');
 				var post = null;
-				if (params && Object.keys(params).length) {
-					var query = [];
-					for (var k in params) {
-						var v = params[k];
-						var key = encodeURIComponent(k);
-						if (v === true) {
-							query.push(key);
-						} else {
-							var val = encodeURIComponent(v);
-							if (v instanceof Array) {
-								val = get ? '%5B' + val + '%5D' : '[' + val + ']';
-							}
-
-							query.push(key + '=' + val);
-						}
-					}
-
-					query = query.join('&');
+				params = query(params);
+				if (params) {
 					if (get) {
-						url += '?' + query;
+						url += '?' + params;
 					} else {
-						post = query;
+						post = params;
 					}
+				}
+
+				if (method === 'GET' && cache[url]) {
+					var dt = new Date();
+					if (cache[url]['expires'] > dt.getTime()) {
+						callback(cache[url]['resp']);
+						return;
+					}
+
+					delete cache[url];
 				}
 
 				var xhr = new XMLHttpRequest();
@@ -119,6 +144,8 @@ sacfeed.init = function(callback) {
 
 					done = true;
 
+					// headers
+
 					var headers = {};
 					var head = xhr.getAllResponseHeaders().split('\n');
 					for (var i = 0, n = head.length; i < n; ++i) {
@@ -130,6 +157,8 @@ sacfeed.init = function(callback) {
 						var parts = header.split(/\s*:\s*/);
 						headers[parts[0].toLowerCase()] = parts[1];
 					}
+
+					// ttl
 
 					var ttl = 0;
 					if (headers['cache-control']) {
@@ -147,20 +176,71 @@ sacfeed.init = function(callback) {
 						ttl = parseInt((expires.getTime() - now.getTime()) / 1000);
 					}
 
-					var status = {
-						'code': xhr['status'],
-						'message': xhr['statusText'],
-						'ttl': (ttl < 0) ? 0 : ttl
-					};
+					ttl = (ttl < 0) ? 0 : ttl;
 
-					callback(status, headers, xhr.responseText);
+					// result
+
+					var responseText = xhr.responseText.trim() || '{}';
+					var result = JSON.parse(responseText);
+
+					// status
+
+					var status;
+					if (xhr['status'] < 200 || xhr['status'] > 299) {
+						status = result;
+						status['ttl'] = ttl; // more accurate ttl
+						result = {};
+					} else {
+						status = {
+							'code': xhr['status'],
+							'message': xhr['statusText'],
+							'ttl': ttl
+						};
+					}
+
+					var resp = {'status': status, 'headers': headers, 'result': result};
+
+					if (method === 'GET' && ttl > 0) {
+						var dt = new Date();
+						cache[url] = {
+							'resp': resp,
+							'expires': dt.getTime() + ttl * 1000
+						};
+					}
+
+					callback(resp);
 				}; // xhr.onreadystatechange
 
 				xhr.send(post);
 			}; // sacfeed.request
 		} else if (sacfeed.Detect.XDR) {
-			sacfeed.request = function(method, url, params, callback) {
+			sacfeed.req = function(method, url, params, callback) {
 				callback = callback || sacfeed.noop;
+
+				var get = (method === 'GET' || method === 'DELETE');
+
+				url = url.replace(/\?.*$/, '');
+
+				// xdr can only use GET and POST methods
+				if (method === 'DELETE') {
+					method = 'GET';
+					params = params || {};
+					params['m'] = 'd';
+				} else if (method === 'PUT') {
+					method = 'POST';
+					params = params || {};
+					params['m'] = 'u';
+				}
+
+				var post = null;
+				params = query(params);
+				if (params) {
+					if (get) {
+						url += '?' + params;
+					} else {
+						post = params;
+					}
+				}
 
 				var xdr = new XDomainRequest();
 				xdr.onprogress = sacfeed.noop; // prevents random "aborted" when the request was successful bug (IE)
@@ -181,10 +261,10 @@ sacfeed.init = function(callback) {
 				};
 
 				xdr.open(method, url);
-				xdr.send();
+				xdr.send(post);
 			};
 		} else { // jsonp fallback
-			sacfeed.request = function(method, url, params, callback) {
+			sacfeed.req = function(method, url, params, callback) {
 				callback({}, {}, '');
 			};
 		}
@@ -194,8 +274,8 @@ sacfeed.init = function(callback) {
 			var delayed = sacfeed.delayed[i];
 			if (delayed.type === 'load') {
 				sacfeed.load.apply(sacfeed, delayed.arguments);
-			} else if (delayed.type === 'request') {
-				sacfeed.request.apply(sacfeed, delayed.arguments);
+			} else if (delayed.type === 'req') {
+				sacfeed.req.apply(sacfeed, delayed.arguments);
 			}
 		}
 
@@ -225,32 +305,6 @@ sacfeed.init = function(callback) {
 		}
 	}
 };
-
-// api request
-
-sacfeed.req = function(crud, req, params, callback) {
-	callback = callback || sacfeed.noop;
-
-	var method = crudmap[crud];
-	if (method !== 'GET') {
-		throw new Error('CRUD action "' + crud + '" not allowed for sacfeed api requests');
-	}
-
-	var uri = sacfeed.urls['api'] + req; // + '.json';
-
-	sacfeed.request(method, uri, params, function(status, headers, responseText) {
-		responseText = responseText.trim() || '{}';
-		var resp = JSON.parse(responseText);
-		if (status.code < 200 || status.code > 299) {
-			var ttl = status.ttl;
-			status = resp;
-			status['ttl'] = ttl;
-			resp = null;
-		}
-
-		callback(status, headers, resp);
-	});
-}; // sacfeed.req
 
 // random ID
 

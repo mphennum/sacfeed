@@ -20,6 +20,7 @@ sacfeed.noop = function() {};
 sacfeed.scripts = {};
 sacfeed.modules = {};
 sacfeed.build = date.getFullYear() + '.' + date.getMonth() + '.' + date.getDate() + '.' + date.getHours();
+sacfeed.protocol = (window.location.protocol === 'https:') ? 'https:' : 'http:';
 
 // dev mode & analytics
 
@@ -38,8 +39,8 @@ for (var i = 0, n = scripts.length; i < n; ++i) {
 	}
 }
 
-sacfeed.urls['api'] = '//api.sacfeed.com/v' + sacfeed.version + '/';
-sacfeed.urls['js'] = '//js.sacfeed.com/v' + sacfeed.version + '/' + (sacfeed.devmode ? 'src/' : sacfeed.build + '/min/');
+sacfeed.urls['api'] = sacfeed.protocol + '//api.sacfeed.com/v' + sacfeed.version + '/';
+sacfeed.urls['js'] = sacfeed.protocol + '//js.sacfeed.com/v' + sacfeed.version + '/' + (sacfeed.devmode ? 'src/' : sacfeed.build + '/min/');
 
 // delayed
 
@@ -52,9 +53,9 @@ sacfeed.load = function() {
 	});
 }; // sacfeed.load
 
-sacfeed.request = function() {
+sacfeed.req = function() {
 	sacfeed.delayed.push({
-		'type': 'request',
+		'type': 'req',
 		'arguments': arguments
 	});
 }; // sacfeed.request
@@ -65,7 +66,7 @@ sacfeed.inc = function(src, callback) {
 	callback = callback || sacfeed.noop;
 
 	if (/^\/\//.test(src)) {
-		src = 'http' + (window.location.protocol === 'https:' ? 's' : '') + ':' + src;
+		src = sacfeed.protocol + src;
 	}
 
 	if (sacfeed.scripts[src]) {

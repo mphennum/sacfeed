@@ -63,22 +63,17 @@ Section.init = function(callback) {
 			sacfeed.req('read', 'article/list', params, callback || sacfeed.noop);
 		};
 
-		var renderAfter = function(status, headers, resp) {
-			if (status.code !== 200 || !resp.articles) {
+		var renderAfter = function(resp) {
+			if (resp.status.code !== 200 || !resp.result.articles || !resp.articles.length) {
 				this.more = false;
 				return;
 			}
 
-			var n = resp.articles.length;
-			if (!n) {
-				this.more = false;
-				return;
-			}
-
+			var n = resp.result.articles.length;
 			this.last = resp.articles[n - 1]['id'];
 
 			for (var i = 0; i < n; ++i) {
-				renderArticle.call(this, resp.articles[i], true);
+				renderArticle.call(this, resp.result.articles[i], true);
 			}
 
 			loadingAfter = false;
@@ -144,17 +139,15 @@ Section.init = function(callback) {
 				params['s'] = this.first;
 			}
 
-			setInterval(fetchSince.bind(this, (function(status, headers, resp) {
-				if (status.code !== 200 || !resp.articles) {
+			setInterval(fetchSince.bind(this, (function(resp) {
+				if (resp.status.code !== 200 || !resp.result.articles || !resp.result.articles.length) {
 					return;
 				}
 
-				if (resp.articles.length) {
-					this.first = resp.articles[0]['id'];
-				}
+				this.first = resp.result.articles[0]['id'];
 
-				for (var i = resp.articles.length - 1; i > -1; --i) {
-					this.queue.unshift(resp.articles[i]);
+				for (var i = resp.result.articles.length - 1; i > -1; --i) {
+					this.queue.unshift(resp.result.articles[i]);
 				}
 
 				showQueue.call(this);
