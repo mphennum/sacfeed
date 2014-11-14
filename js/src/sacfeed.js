@@ -212,14 +212,13 @@ sacfeed.init = function(callback) {
 				}; // xhr.onreadystatechange
 
 				xhr.send(post);
-			}; // sacfeed.request
+			}; // sacfeed.req
 		} else if (sacfeed.Detect.XDR) {
-			sacfeed.req = function(method, url, params, callback) {
+			sacfeed.req = function(crud, uri, params, callback) {
 				callback = callback || sacfeed.noop;
 
-				var get = (method === 'GET' || method === 'DELETE');
-
-				url = url.replace(/\?.*$/, '');
+				var method = crudmap[crud];
+				var url = sacfeed.urls['api'] + uri.replace(/\?.*$/, '').replace(/\.[^\/]*$/, '');
 
 				// xdr can only use GET and POST methods
 				if (method === 'DELETE') {
@@ -232,6 +231,7 @@ sacfeed.init = function(callback) {
 					params['m'] = 'u';
 				}
 
+				var get = (method === 'GET');
 				var post = null;
 				params = query(params);
 				if (params) {
@@ -240,6 +240,16 @@ sacfeed.init = function(callback) {
 					} else {
 						post = params;
 					}
+				}
+
+				if (crud === 'read' && cache[url]) {
+					var dt = new Date();
+					if (cache[url]['expires'] > dt.getTime()) {
+						callback(cache[url]['resp']);
+						return;
+					}
+
+					delete cache[url];
 				}
 
 				var xdr = new XDomainRequest();
@@ -255,18 +265,28 @@ sacfeed.init = function(callback) {
 
 					done = true;
 
-					var status = {};
-					var headers = {};
-					callback(status, headers, xdr.responseText);
+					var responseText = xdr.responseText.trim() || '{}';
+					var resp = JSON.parse(responseText);
+
+					var ttl = resp.status.ttl;
+					if (crud === 'read' && ttl > 0) {
+						var dt = new Date();
+						cache[url] = {
+							'resp': resp,
+							'expires': dt.getTime() + ttl * 1000
+						};
+					}
+
+					callback(resp);
 				};
 
 				xdr.open(method, url);
 				xdr.send(post);
-			};
+			}; // sacfeed.req
 		} else { // jsonp fallback
-			sacfeed.req = function(method, url, params, callback) {
+			sacfeed.req = function(crud, uri, params, callback) {
 				callback({}, {}, '');
-			};
+			}; // sacfeed.req
 		}
 
 		// delayed

@@ -142,27 +142,12 @@ class Request {
 
 			$response = $result;
 		} else {
-			if ($api) {
-				if ($status['code'] < 300) {
-					$response = null;
-					foreach ($result as $resource) {
-						if (!is_array($resource) || !empty($resource)) {
-							$response = $result;
-							break;
-						}
-					}
-
-					if ($response === null && $this->method === 'GET' && $status['code'] === 200) {
-						$this->response->noContent();
-						$status = $this->response->status;
-					}
-				} else {
-					$response = $status;
-					if ($status['code'] === 405) {
-						$headers['Allow'] = 'GET, HEAD';
-					} else if ($status['code'] === 301) {
-						$headers['Location'] = $result['location'];
-					}
+			if ($api && $status['code'] > 299) {
+				$response = $status;
+				if ($status['code'] === 405) {
+					$headers['Allow'] = 'GET, HEAD';
+				} else if ($status['code'] === 301) {
+					$headers['Location'] = $result['location'];
 				}
 			} else {
 				$response = $result;
@@ -190,7 +175,7 @@ class Request {
 				self::setCache($opts['host'], $opts['resource'], $opts['action'], $opts['params'], [
 					'status' => $status,
 					'headers' => $headers,
-					'result' => $response
+					'result' => $result
 				], $this->response->ttl);
 			}
 		}

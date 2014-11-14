@@ -4,10 +4,8 @@ namespace Sacfeed;
 
 header('Content-Type: application/json; charset=UTF-8');
 
-$response = [
+echo json_encode([
 	'status' => $status,
 	'headers' => $headers,
 	'result' => $result
-];
-
-echo json_encode($response, Config::DEVMODE ? JSON_PRETTY_PRINT : 0);
+], Config::DEVMODE ? JSON_PRETTY_PRINT : 0);

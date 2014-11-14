@@ -7,7 +7,7 @@ class Response {
 		200 => 'OK', // request was successful
 		201 => 'Created', // resource has been created
 		202 => 'Accepted', // successful update or delete
-		204 => 'No Content', // no content to return
+		//204 => 'No Content', // no content to return -- don't use this, it causes problems with jsonp and xdr
 
 		301 => 'Moved Permanently', // request can be found at a new location
 		304 => 'Not Modified', // resource has not been modified since last request
@@ -93,9 +93,9 @@ class Response {
 		$this->setStatus(202, $reason);
 	}
 
-	public function noContent($reason = null) {
+	/*public function noContent($reason = null) {
 		$this->setStatus(204, $reason);
-	}
+	}*/
 
 	// 300
 
