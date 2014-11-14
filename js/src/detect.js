@@ -1,4 +1,4 @@
-(function(sacfeed) {
+(function(sacfeed, XMLHttpRequest, XDomainRequest) {
 
 'use strict';
 
@@ -20,4 +20,4 @@ Detect.init = function(callback) {
 	callback();
 }; // Detect.init
 
-})(window.sacfeed);
+})(window.sacfeed, window.XMLHttpRequest, window.XDomainRequest);
