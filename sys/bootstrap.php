@@ -2,7 +2,7 @@
 
 namespace Sacfeed;
 
-require __DIR__ . '/../conf/Config.php';
+require __DIR__ . '/../etc/Config.php';
 require __DIR__ . '/../lib/App.php';
 require __DIR__ . '/../lib/Cache.php';
 require __DIR__ . '/../lib/Database.php';
