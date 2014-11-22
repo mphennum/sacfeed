@@ -19,7 +19,7 @@ var date = new Date();
 sacfeed.noop = function() {};
 sacfeed.scripts = {};
 sacfeed.modules = {};
-sacfeed.build = date.getFullYear() + '.' + date.getMonth() + '.' + date.getDate() + '.' + date.getHours();
+sacfeed.build = [date.getFullYear(), date.getMonth() + 1, date.getDate(), '.', date.getHours()].join('');
 sacfeed.protocol = (window.location.protocol === 'https:') ? 'https:' : 'http:';
 
 // dev mode & analytics
@@ -27,7 +27,7 @@ sacfeed.protocol = (window.location.protocol === 'https:') ? 'https:' : 'http:';
 sacfeed.analytics = [];
 sacfeed.devmode = false;
 var scripts = document.getElementsByTagName('script');
-for (var i = 0, n = scripts.length; i < n; ++i) {
+for (var i = 0; i < scripts.length; ++i) {
 	var m = scripts[i].src.match(/\/(min|src)\/sf.js(?:#(.*))?$/);
 	if (m) {
 		sacfeed.devmode = (m[1] === 'src');

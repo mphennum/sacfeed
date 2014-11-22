@@ -1,13 +1,29 @@
 /* main */
 
+main {
+	display: block;
+
+	margin: 0 auto;
+	max-width: 330px;
+}
+
+section {
+	float: left;
+	margin-left: 5px;
+	max-width: 330px;
+}
+
+section:first-child {
+	margin-left: 0;
+}
+
 article {
 	background: #FFF;
 	border-radius: 3px;
 	box-shadow: 0 0 1px 1px #CCC;
 
-	margin: 0 auto 5px auto;
+	margin: 0 0 5px 0;
 	width: 100%;
-	max-width: 330px;
 }
 
 article .sf-top {

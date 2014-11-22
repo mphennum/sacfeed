@@ -1,4 +1,4 @@
-(function(window, sacfeed, JSON) {
+(function(window, sacfeed, JSON, Math) {
 
 'use strict';
 
@@ -12,7 +12,7 @@ var packages = sacfeed.packages = sacfeed.packages || {};
 var packagemap = sacfeed.packagemap = {};
 for (var k in packages) {
 	var pkg = packages[k];
-	for (var i = 0, n = pkg.length; i < n; ++i) {
+	for (var i = 0; i < pkg.length; ++i) {
 		packagemap[pkg[i]] = k;
 	}
 }
@@ -162,7 +162,7 @@ sacfeed.init = function(callback) {
 					var ttl = 0;
 					if (headers['cache-control']) {
 						var vars = headers['cache-control'].split(/\s*[,;]\s*/);
-						for (var i = 0, n = vars.length; i < n; ++i) {
+						for (var i = 0; i < vars.length; ++i) {
 							var parts = vars[i].trim().split(/\s*=\s*/);
 							if (parts[0] === 'max-age') {
 								ttl = parseInt(parts[1]);
@@ -346,7 +346,7 @@ sacfeed.init = function(callback) {
 		}
 
 		// delayed
-		for (var i = 0, n = sacfeed.delayed.length; i < n; ++i) {
+		for (var i = 0; i < sacfeed.delayed.length; ++i) {
 			var delayed = sacfeed.delayed[i];
 			if (delayed.type === 'load') {
 				sacfeed.load.apply(sacfeed, delayed.arguments);
@@ -358,7 +358,7 @@ sacfeed.init = function(callback) {
 		delete sacfeed.delayed;
 
 		// analytics
-		for (var i = 0, n = sacfeed.analytics.length; i < n; ++i) {
+		for (var i = 0; i < sacfeed.analytics.length; ++i) {
 			var analytic = analyticsmap[sacfeed.analytics[i]];
 			if (!analytic) {
 				throw new Error('Invalid analytics item "' + sacfeed.analytics[i] + '"');
@@ -382,7 +382,11 @@ sacfeed.init = function(callback) {
 	}
 };
 
-// random ID
+// random
+
+sacfeed.rand = function(min, max) {
+	return Math.round(Math.random() * (max - min)) + min;
+};
 
 sacfeed.randID = function() {
 	return Math.floor(Math.random() * 0x7FFFFFFF).toString(36);
@@ -399,7 +403,7 @@ var namespace = function(modname) {
 
 	var module = sacfeed;
 	var parts = modname.split('.');
-	for (var i = 0, n = parts.length; i < n; ++i) {
+	for (var i = 0; i < parts.length; ++i) {
 		module = module[parts[i]];
 	}
 
@@ -408,7 +412,7 @@ var namespace = function(modname) {
 
 var init = function(modname) {
 	var ready = function() {
-		for (var i = 0, n = listen[modname].length; i < n; ++i) {
+		for (var i = 0; i < listen[modname].length; ++i) {
 			listen[modname][i]();
 		}
 
@@ -474,4 +478,4 @@ var load = function(modname, callback) {
 	}
 }; // load
 
-})(window, window.sacfeed, window.JSON);
+})(window, window.sacfeed, window.JSON, Math);

@@ -29,17 +29,21 @@ Section.init = function(callback) {
 			}
 
 			opts = opts || {};
-			opts['parent'] = opts['parent'] || sacfeed.$body;
+			opts['parent'] = opts['parent'] || sacfeed.$main;
 
 			this.section = opts['section'] || '/';
 			this.first = opts['first'] || null;
 			this.last = opts['last'] || null;
 			this.authormap = opts['authormap'] || {};
 			this.titlemap = opts['titlemap'] || {};
+			this.articles = opts['articles'] || [];
 
 			this.more = true;
 			this.queue = [];
 			this.$queuebtn = sacfeed.$header.find('.sf-queuebtn');
+
+			this.$sections = [];
+			this.$articles = [];
 
 			Ele.prototype.constructor.call(this, opts);
 
@@ -69,11 +73,12 @@ Section.init = function(callback) {
 				return;
 			}
 
-			var n = resp.result.articles.length;
-			this.last = resp.result.articles[n - 1]['id'];
+			var articles = resp.result.articles;
+			var n = articles.length;
+			this.last = articles[n - 1]['id'];
 
 			for (var i = 0; i < n; ++i) {
-				renderArticle.call(this, resp.result.articles[i], true);
+				renderArticle.call(this, this.$sections[this.lastPos++ % this.$sections.length], articles[i], true);
 			}
 
 			loadingAfter = false;
@@ -107,11 +112,45 @@ Section.init = function(callback) {
 			this.$queuebtn.fadeOut(100);
 
 			for (var i = this.queue.length - 1; i > -1; --i) {
-				renderArticle.call(this, this.queue[i], false);
+				renderArticle.call(this, this.$sections[this.firstPos++ % this.$sections.length], this.queue[i], false);
 			}
 
 			this.queue = [];
 			$('html, body').animate({'scrollTop': 0}, 1000);
+		};
+
+		// resize
+
+		var resize = function(width) {
+			var cols = Math.floor((width - 5) / 335);
+
+			if (cols === this.$sections.length) {
+				return;
+			}
+
+			if (cols < 1) {
+				cols = 1;
+			} else if (cols > 4) {
+				cols = 4;
+			}
+
+			this.firstPos = 0;
+			this.lastPos = 0;
+
+			var w = cols * 335 - 5;
+			sacfeed.$header.children('.sf-wrapper').css('max-width', w);
+			this.$.css('max-width', w);
+			this.$.empty();
+			this.$sections = [];
+			for (var i = 0; i < cols; ++i) {
+				var $section = $('<section>')
+				this.$sections.push($section);
+				this.$.append($section);
+			}
+
+			for (var i = 0; i < this.$articles.length; ++i) {
+				this.$sections[i % cols].append(this.$articles[i]);
+			}
 		};
 
 		// render
@@ -144,14 +183,17 @@ Section.init = function(callback) {
 					return;
 				}
 
-				this.first = resp.result.articles[0]['id'];
+				var articles = resp.result.articles;
+				this.first = articles[0]['id'];
 
-				for (var i = resp.result.articles.length - 1; i > -1; --i) {
-					this.queue.unshift(resp.result.articles[i]);
+				for (var i = articles.length - 1; i > -1; --i) {
+					this.queue.unshift(articles[i]);
 				}
 
 				showQueue.call(this);
 			}).bind(this)), 180 * 1000);
+
+			// auto scroll
 
 			var scrolltimer;
 			$window.scroll((function() {
@@ -166,10 +208,39 @@ Section.init = function(callback) {
 				scrolltimer = setTimeout(scroll.bind(this), 100);
 			}).bind(this));
 
+			// render
+
+			var $section = $('<section>'); // not actually shown
+			for (var i = 0; i < this.articles.length; ++i) {
+				renderArticle.call(this, $section, this.articles[i], true);
+			}
+
+			delete this.articles;
+
+			// resize
+
+			var timer;
+			var width = $window.width();
+			resize.call(this, width);
+			$window.resize((function() {
+				var w = $window.width();
+				if (width === w) {
+					return;
+				}
+
+				width = w;
+
+				if (timer) {
+					clearTimeout(timer);
+				}
+
+				timer = setTimeout(resize.bind(this, w), 300);
+			}).bind(this));
+
 			return this;
 		};
 
-		var renderArticle = function(article, post) {
+		var renderArticle = function($section, article, append) {
 			var dt = new Date(article['ts']);
 
 			var profile = '';
@@ -235,10 +306,12 @@ Section.init = function(callback) {
 				'</article>'
 			);
 
-			if (post) {
-				sacfeed.$main.append($article);
+			if (append) {
+				$section.append($article);
+				this.$articles.push($article);
 			} else {
-				sacfeed.$main.prepend($article);
+				$section.prepend($article);
+				this.$articles.unshift($article);
 			}
 
 			$article.fadeIn(300);

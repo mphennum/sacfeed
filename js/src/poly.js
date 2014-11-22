@@ -22,11 +22,11 @@ Poly.init = function(callback) {
 
 	// String
 
-	String.ltrim = String.ltrim || String.trimLeft || function() {
+	String.ltrim = String.trimLeft || function() {
 		return this.replace(/^\s+/, '');
 	};
 
-	String.rtrim = String.rtrim || String.trimRight || function() {
+	String.rtrim = String.trimRight || function() {
 		return this.replace(/\s+$/, '');
 	};
 
@@ -34,18 +34,18 @@ Poly.init = function(callback) {
 		return this.replace(/^\s+|\s+$/g, '');
 	};
 
-	String.ucwords = String.ucwords || function() {
+	String.ucwords = function() {
 		return this.replace(/\b[a-z]+\b/gi, function(s) {
 			return s.charAt(0).toUpperCase() + s.substr(1).toLowerCase();
 		});
 	};
 
-	String.entityEncode = String.entityEncode || function() {
-		return $('<p/>').text(this).html();
+	String.entityEncode = function() {
+		return $('<p>').text(this).html();
 	};
 
-	String.entityDecode = String.entityDecode || function() {
-		return $('<p/>').html(this).text();
+	String.entityDecode = function() {
+		return $('<p>').html(this).text();
 	};
 
 	var deaccentMap = [
@@ -136,9 +136,9 @@ Poly.init = function(callback) {
 		{'base': 'z', 'letters': /[\u007A\u24E9\uFF5A\u017A\u1E91\u017C\u017E\u1E93\u1E95\u01B6\u0225\u0240\u2C6C\uA763]/g}
 	];
 
-	String.deaccent = String.deaccent || function() {
+	String.deaccent = function() {
 		var s = this.toString();
-		for (var i = 0, n = deaccentMap.length; i < n; i++) {
+		for (var i = 0, n = deaccentMap.length; i < n; ++i) {
 			s = s.replace(deaccentMap[i].letters, deaccentMap[i].base);
 		}
 
@@ -203,7 +203,7 @@ Poly.init = function(callback) {
 
 	// intended to be similar to php's date format, copy "format characters" as needed from this page:
 	// https://php.net/manual/en/function.date.php
-	Date.format = Date.format || function(format, utc) {
+	Date.format = function(format, utc) {
 		format = format || 'Y-m-d H:i:s';
 		format = format.replace(/([a-z])/ig, '{{$1}}');
 
@@ -313,7 +313,7 @@ Poly.init = function(callback) {
 			}
 
 			if (hasDontEnumBug) {
-				for (var i = 0; i < n; i++) {
+				for (var i = 0; i < n; ++i) {
 					if (hasOwnProperty.call(obj, dontEnums[i])) {
 						result.push(dontEnums[i]);
 					}
