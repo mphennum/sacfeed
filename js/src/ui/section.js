@@ -78,7 +78,7 @@ Section.init = function(callback) {
 			this.last = articles[n - 1]['id'];
 
 			for (var i = 0; i < n; ++i) {
-				renderArticle.call(this, this.$sections[this.lastPos++ % this.$sections.length], articles[i], true);
+				renderArticle.call(this, articles[i], true);
 			}
 
 			loadingAfter = false;
@@ -112,7 +112,7 @@ Section.init = function(callback) {
 			this.$queuebtn.fadeOut(100);
 
 			for (var i = this.queue.length - 1; i > -1; --i) {
-				renderArticle.call(this, this.$sections[this.firstPos++ % this.$sections.length], this.queue[i], false);
+				renderArticle.call(this, this.queue[i], false);
 			}
 
 			this.queue = [];
@@ -120,6 +120,22 @@ Section.init = function(callback) {
 		};
 
 		// resize
+
+		var shortestSection = function() {
+			var n =this.$sections.length;
+			if (!n) {
+				return $('<section>');
+			}
+
+			var $section = this.$sections[0];
+			for (var i = 1; i < n; ++i) {
+				if ($section.height() > this.$sections[i].height()) {
+					$section = this.$sections[i];
+				}
+			}
+
+			return $section;
+		};
 
 		var resize = function(width) {
 			var cols = Math.floor((width - 5) / 335);
@@ -134,9 +150,6 @@ Section.init = function(callback) {
 				cols = 4;
 			}
 
-			this.firstPos = 0;
-			this.lastPos = 0;
-
 			var w = cols * 335 - 5;
 			sacfeed.$header.children('.sf-wrapper').css('max-width', w);
 			this.$.css('max-width', w);
@@ -149,7 +162,7 @@ Section.init = function(callback) {
 			}
 
 			for (var i = 0; i < this.$articles.length; ++i) {
-				this.$sections[i % cols].append(this.$articles[i]);
+				var $section = shortestSection.call(this).append(this.$articles[i]);
 			}
 		};
 
@@ -210,9 +223,8 @@ Section.init = function(callback) {
 
 			// render
 
-			var $section = $('<section>'); // not actually shown
 			for (var i = 0; i < this.articles.length; ++i) {
-				renderArticle.call(this, $section, this.articles[i], true);
+				renderArticle.call(this, this.articles[i], true);
 			}
 
 			delete this.articles;
@@ -240,7 +252,7 @@ Section.init = function(callback) {
 			return this;
 		};
 
-		var renderArticle = function($section, article, append) {
+		var renderArticle = function(article, append) {
 			var dt = new Date(article['ts']);
 
 			var profile = '';
@@ -305,6 +317,8 @@ Section.init = function(callback) {
 					'</div>' +
 				'</article>'
 			);
+
+			var $section = shortestSection.call(this);
 
 			if (append) {
 				$section.append($article);
