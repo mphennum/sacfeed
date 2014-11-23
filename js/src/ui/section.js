@@ -68,12 +68,12 @@ Section.init = function(callback) {
 		};
 
 		var renderAfter = function(resp) {
-			if (resp.status.code !== 200 || !resp.result.articles || !resp.result.articles.length) {
+			var articles = resp.result.articles;
+			if (resp.status.code !== 200 || !articles || !articles.length) {
 				this.more = false;
 				return;
 			}
 
-			var articles = resp.result.articles;
 			var n = articles.length;
 			this.last = articles[n - 1]['id'];
 
@@ -85,7 +85,7 @@ Section.init = function(callback) {
 		};
 
 		var scroll = function() {
-			if ($window.scrollTop() + $window.height() > $document.height() - 1000 && !loadingAfter) {
+			if ($window.scrollTop() + $window.height() > $document.height() - 750 * this.$sections.length && !loadingAfter) {
 				loadingAfter = true;
 				fetchAfter.call(this, renderAfter.bind(this));
 			}
@@ -179,11 +179,11 @@ Section.init = function(callback) {
 			}
 
 			setInterval(fetchSince.bind(this, (function(resp) {
-				if (resp.status.code !== 200 || !resp.result.articles || !resp.result.articles.length) {
+				var articles = resp.result.articles;
+				if (resp.status.code !== 200 || !articles || !articles.length) {
 					return;
 				}
 
-				var articles = resp.result.articles;
 				this.first = articles[0]['id'];
 
 				for (var i = articles.length - 1; i > -1; --i) {
