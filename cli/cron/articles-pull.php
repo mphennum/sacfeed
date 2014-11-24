@@ -17,7 +17,7 @@ $ts->sec -= 60 * 60 * 3;
 
 // make sure ttl is the same as article-clean.php
 $old = new MongoDate();
-$old->sec -= 60 * 60 * 24 * 7;
+$old->sec -= 60 * 60 * 24 * 7 * 4;
 
 $n = 0;
 $seen = [];
