@@ -1,4 +1,4 @@
-(function(sacfeed, XMLHttpRequest, XDomainRequest) {
+(function(sacfeed, XMLHttpRequest) {
 
 'use strict';
 
@@ -15,9 +15,9 @@ Detect.init = function(callback) {
 	callback = callback || sacfeed.noop;
 
 	Detect.XHR = (XMLHttpRequest && 'withCredentials' in new XMLHttpRequest());
-	Detect.XDR = (typeof XDomainRequest !== 'undefined');
+	Detect.XDR = (typeof window.XDomainRequest !== 'undefined');
 
 	callback();
 }; // Detect.init
 
-})(window.sacfeed, window.XMLHttpRequest, window.XDomainRequest);
+})(window.sacfeed, window.XMLHttpRequest);

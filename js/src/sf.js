@@ -16,7 +16,7 @@ var sacfeed = window.sacfeed = {
 var head = document.getElementsByTagName('head')[0];
 var date = new Date();
 
-sacfeed.noop = function() {};
+var noop = sacfeed.noop = function() {};
 sacfeed.scripts = {};
 sacfeed.modules = {};
 sacfeed.build = [date.getFullYear(), date.getMonth() + 1, date.getDate(), '.', date.getHours()].join('');
@@ -63,7 +63,7 @@ sacfeed.req = function() {
 // include external script
 
 sacfeed.inc = function(src, callback) {
-	callback = callback || sacfeed.noop;
+	callback = callback || noop;
 
 	if (/^\/\//.test(src)) {
 		src = sacfeed.protocol + src;
@@ -80,17 +80,9 @@ sacfeed.inc = function(src, callback) {
 	script.type = 'text/javascript';
 	script.async = 'true';
 
-	var loaded = false;
 	var ready = function() {
-		if (loaded) {
-			return;
-		}
-
-		loaded = true;
-		setTimeout(function() {
-			head.removeChild(script);
-			callback();
-		}, 10);
+		callback();
+		callback = noop;
 	};
 
 	script.onload = ready;

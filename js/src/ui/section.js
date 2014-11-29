@@ -140,14 +140,14 @@ Section.init = function(callback) {
 		var resize = function(width) {
 			var cols = Math.floor((width - 5) / 335);
 
-			if (cols === this.$sections.length) {
-				return;
-			}
-
 			if (cols < 1) {
 				cols = 1;
 			} else if (cols > 4) {
 				cols = 4;
+			}
+
+			if (cols === this.$sections.length) {
+				return;
 			}
 
 			var w = cols * 335 - 5;
@@ -156,13 +156,13 @@ Section.init = function(callback) {
 			this.$.empty();
 			this.$sections = [];
 			for (var i = 0; i < cols; ++i) {
-				var $section = $('<section>')
+				var $section = $('<section>');
 				this.$sections.push($section);
 				this.$.append($section);
 			}
 
 			for (var i = 0; i < this.$articles.length; ++i) {
-				var $section = shortestSection.call(this).append(this.$articles[i]);
+				shortestSection.call(this).append(this.$articles[i]);
 			}
 		};
 
@@ -214,10 +214,7 @@ Section.init = function(callback) {
 					return;
 				}
 
-				if (scrolltimer) {
-					clearTimeout(scrolltimer);
-				}
-
+				clearTimeout(scrolltimer);
 				scrolltimer = setTimeout(scroll.bind(this), 100);
 			}).bind(this));
 
