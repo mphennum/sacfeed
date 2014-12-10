@@ -85,7 +85,7 @@ Section.init = function(callback) {
 		};
 
 		var scroll = function() {
-			if ($window.scrollTop() + $window.height() > $document.height() - 750 * this.$sections.length && !loadingAfter) {
+			if (!loadingAfter && $window.scrollTop() + $window.height() > $document.height() - 750 * this.$sections.length) {
 				loadingAfter = true;
 				fetchAfter.call(this, renderAfter.bind(this));
 			}
