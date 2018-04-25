@@ -18,7 +18,7 @@ abstract class Database {
 	static public $mongo;
 
 	static public function init() {
-		self::$client = new MongoClient(Config::DBHOST);
+		self::$client = new MongoClient(Config::DBHOST, ['username' => Config::DBUSER, 'password' => Config::DBPASS]);
 
 		self::$mongo = self::$client->sacfeed;
 		self::$mongo->w = 0;
