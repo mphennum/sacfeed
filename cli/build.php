@@ -9,7 +9,7 @@ require __DIR__ . '/../sys/bootstrap.php';
 
 CLI::init(__FILE__, 'Sacfeed -- build / minify', [
 	'c' => 'combine packages only, no minification',
-	'r' => 'remove the contests of the minified dir'
+	'r' => 'remove the contents of the minified dir'
 ]);
 
 $dir = realpath(__DIR__ . '/../');

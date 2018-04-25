@@ -29,9 +29,9 @@ for (var k in crudmap) {
 	methodmap[crudmap[k]] = k;
 }
 
-sacfeed.urls['www'] = sacfeed.protocol + '//www.sacfeed.com/';
-sacfeed.urls['js'] = sacfeed.protocol + '//js.sacfeed.com/v' +  (sacfeed.devmode ? sacfeed.version + '/src/' : sacfeed.build + '/min/');
-sacfeed.urls['img'] = sacfeed.protocol + '//img.sacfeed.com/v' + (sacfeed.devmode ? sacfeed.version : sacfeed.build) + '/';
+sacfeed.urls['www'] = sacfeed.protocol + '//sacfeed.mphennum.com/';
+sacfeed.urls['js'] = sacfeed.protocol + '//sacfeed-js.mphennum.com/v' +  (sacfeed.devmode ? sacfeed.version + '/src/' : sacfeed.build + '/min/');
+sacfeed.urls['img'] = sacfeed.protocol + '//sacfeed-img.mphennum.com/v' + (sacfeed.devmode ? sacfeed.version : sacfeed.build) + '/';
 sacfeed.urls['authorimg'] = sacfeed.urls['img'] + 'author/';
 
 // request

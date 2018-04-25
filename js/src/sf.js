@@ -39,8 +39,8 @@ for (var i = 0; i < scripts.length; ++i) {
 	}
 }
 
-sacfeed.urls['api'] = sacfeed.protocol + '//api.sacfeed.com/v' + sacfeed.version + '/';
-sacfeed.urls['js'] = sacfeed.protocol + '//js.sacfeed.com/v' + sacfeed.version + '/' + (sacfeed.devmode ? 'src/' : sacfeed.build + '/min/');
+sacfeed.urls['api'] = sacfeed.protocol + '//sacfeed-api.mphennum.com/v' + sacfeed.version + '/';
+sacfeed.urls['js'] = sacfeed.protocol + '//sacfeed-js.mphennum.com/v' + sacfeed.version + '/' + (sacfeed.devmode ? 'src/' : sacfeed.build + '/min/');
 
 // delayed
 
