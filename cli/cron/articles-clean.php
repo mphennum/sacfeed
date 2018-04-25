@@ -16,4 +16,4 @@ $old->sec -= 60 * 60 * 24 * 7 * 4;
 
 Database::remove(Article::COLLECTION, ['ts' => ['$lt' => $old]], 0, true);
 
-CLI::notice('Old articles (7 days) have been removed');
+CLI::notice('Old articles (4 weeks) have been removed');
