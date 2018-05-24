@@ -12,22 +12,17 @@ require __DIR__ . '/../../sys/bootstrap.php';
 
 CLI::init(__FILE__, 'Sacfeed -- pull new articles cli');
 
-$ts = new MongoDate();
-$ts->sec -= 60 * 60 * 3;
-
-// make sure ttl is the same as article-clean.php
-$old = new MongoDate();
-$old->sec -= 60 * 60 * 24 * 7 * 4;
-
-$n = 0;
+$nn = 0; // number of new articles
+$no = 0; // number of old articles
 $seen = [];
-$cursor = Section::find(['ts' => ['$gt' => $ts]], ['_id' => 1]);
+$cursor = Section::find([], ['_id' => 1]);
 foreach ($cursor as $record) {
 	$section = $record['_id'];
 
+	CLI::subtitle($section);
+
 	$url = 'http://' . Config::SACBEEHOST . $section . Config::JSONQUERY;
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_URL, $url);
+	$ch = curl_init($url);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	$json = curl_exec($ch);
 	$info = curl_getinfo($ch);
@@ -36,7 +31,7 @@ foreach ($cursor as $record) {
 		CLI::error('curl failed: ' . $url);
 	}
 
-	CLI::message($url);
+	CLI::notice($url);
 	$json = json_decode($json, true);
 
 	foreach ($json['items'] as $item) {
@@ -49,21 +44,24 @@ foreach ($cursor as $record) {
 		$seen[$id] = true;
 
 		$article = new Article();
-		if ($article->findOne($id)) {
-			continue;
-		}
-
+		$exists = $article->findOne($id);
 		$article->setJSONFields($section, $item);
 
-		if ($article->ts->sec < $old->sec) {
-			continue;
+		if ($exists) {
+			$article->update(1);
+			++$no;
+		} else {
+			$article->insert(1);
+			++$nn;
 		}
 
-		$article->insert(1);
+		CLI::message('[' . $id . '] ', $article->title);
 
-		++$n;
-		CLI::message($article->title);
+		sleep(1);
 	}
+
+	sleep(1);
 }
 
-CLI::notice($n . ' articles inserted');
+CLI::notice($no . ' articles updated');
+CLI::notice($nn . ' articles inserted');

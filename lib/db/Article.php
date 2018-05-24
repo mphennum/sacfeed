@@ -4,6 +4,7 @@ namespace Sacfeed\DB;
 
 use MongoDate;
 
+use Sacfeed\CLI;
 use Sacfeed\Database;
 
 class Article extends Record {
@@ -75,21 +76,22 @@ class Article extends Record {
 			}
 		}
 
-
 		if ($this->fields['thumb'] !== null) {
 			$url = preg_replace('/\/FREE_[0-9]+\//', '/LANDSCAPE_320/', $this->fields['thumb']);
 
-			$ch = curl_init();
-			curl_setopt($ch, CURLOPT_URL, $url);
-			curl_setopt($ch, CURLOPT_NOBODY, true);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-			curl_setopt($ch, CURLOPT_MAXREDIRS, 5);
+			$ch = curl_init($url);
+			curl_setopt_array($ch, [
+				CURLOPT_NOBODY => true,
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_FOLLOWLOCATION => true,
+				CURLOPT_MAXREDIRS => 5
+			]);
+
 			$header = curl_exec($ch);
 			$info = curl_getinfo($ch);
 			curl_close($ch);
 
-			if ($header !== false && $info['http_code'] > 199 && $info['http_code'] < 300) {
+			if ($header !== false && $info['http_code'] === 200) {
 				$this->fields['thumb'] = $url;
 			}
 		}
