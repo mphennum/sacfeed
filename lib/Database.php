@@ -3,34 +3,41 @@
 namespace Sacfeed;
 
 use Exception;
-use MongoClient;
+use MongoDB\Driver\Manager as MongoManager;
+use MongoDB\Driver\Command as MongoCommand;
 
 abstract class Database {
+
 	//const SAVE = 0;
 	const BATCH = 1;
 	const INSERT = 2;
 	const UPDATE = 3;
 	const REMOVE = 4;
 
-	static private $client;
-	static private $queue;
+	const WRITECONCERN = 0;
+	const WRITETIMEOUT = 30000;
 
-	static public $mongo;
+	static private $queue;
+	static private $client;
 
 	static public function init() {
-		self::$client = new MongoClient(Config::DBHOST, ['username' => Config::DBUSER, 'password' => Config::DBPASS]);
-
-		self::$mongo = self::$client->sacfeed;
-		self::$mongo->w = 0;
-		self::$mongo->wtimeout = 30000;
-
 		self::$queue = [];
+		self::$client = new MongoManager(Config::DBHOST, ['username' => Config::DBUSER, 'password' => Config::DBPASS]);
 	}
 
 	// commands
 
 	static public function distinct($collection, $field, $query = []) {
-		return self::$mongo->$collection->distinct($field, $query);
+		$cursor = self::$client->executeCommand(
+			Config::DBNAME,
+			new MongoCommand([
+				'distinct' => $collection,
+				'key' => $field,
+				'query' => $query
+			])
+		);
+
+		return $cursor->toArray()[0]->values;
 	}
 
 	static public function find($collection, $query = [], $projection = []) {
@@ -184,7 +191,6 @@ abstract class Database {
 				self::batchInsert($collection, $batch, false);
 			}
 		}
-
-
 	}
+
 }
