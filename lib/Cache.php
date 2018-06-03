@@ -81,7 +81,8 @@ abstract class Cache {
 	// shutdown
 
 	static public function shutdown() {
-		foreach (self::$queue as $item) {
+		for ($i = 0, $n = count(self::$queue); $i < $n; ++$i) {
+			$item = self::$queue[$i];
 			if ($item['type'] === self::SET) {
 				self::set($item['key'], $item['params'], $item['value'], $item['ttl'], false);
 			} else if ($item['type'] === self::DEL) {
