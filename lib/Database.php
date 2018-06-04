@@ -28,7 +28,7 @@ abstract class Database {
 
 	// commands
 
-	static public function distinct($collection, $field, $query = []) {
+	static public function distinct($collection, $field, array $query = []) {
 		$cursor = self::$client->executeReadCommand(
 			Config::DBNAME,
 			new MongoCommand([
@@ -65,8 +65,9 @@ abstract class Database {
 		return $cursor;
 	}
 
-	static public function findOne($collection, $query = [], $projection = []) {
-		return self::$mongo->$collection->findOne($query, $projection);
+	static public function findOne($collection, array $query = [], array $projection = null) {
+		$results = self::find($collection, $query, $projection, null, 1)->toArray();
+		return $results[0] ?? null;
 	}
 
 	static public function batchInsert($collection, $records = [], $w = 0) {
