@@ -3,6 +3,8 @@
 namespace Sacfeed;
 
 use Exception;
+use MongoDB\Driver\WriteConcern as MongoWriteConcern;
+use MongoDB\Driver\BulkWrite as MongoBulkWrite;
 use MongoDB\Driver\Manager as MongoManager;
 use MongoDB\Driver\Command as MongoCommand;
 use MongoDB\Driver\Query as MongoQuery;
@@ -23,7 +25,15 @@ abstract class Database {
 
 	static public function init() {
 		self::$queue = [];
-		self::$client = new MongoManager(Config::DBHOST, ['username' => Config::DBUSER, 'password' => Config::DBPASS]);
+		self::$client = new MongoManager(
+			Config::DBHOST,
+			[
+				'username' => Config::DBUSER,
+				'password' => Config::DBPASS,
+				'w' => self::WRITECONCERN,
+				'wTimeoutMS' => self::WRITETIMEOUT
+			]
+		);
 	}
 
 	// commands
@@ -76,7 +86,10 @@ abstract class Database {
 		}
 
 		$seen = [];
-		foreach ($records as $record) {
+		$n = count($records);
+		for ($i = 0; $i < $n; ++$i) {
+			$record = $records[$i];
+
 			$id = $record['_id'];
 			if (isset($seen[$id])) {
 				throw new Exception('Duplicate ID found in batch insert');
@@ -100,7 +113,18 @@ abstract class Database {
 			$w = 0;
 		}
 
-		self::$mongo->$collection->batchInsert($records, ['continueOnError' => true, 'w' => $w]);
+		$bulk = new MongoBulkWrite(['ordered' => false]);
+		for ($i = 0; $i < $n; ++$i) {
+			$bulk->insert($records[$i]);
+		}
+
+		$opts = [];
+
+		if ($w !== self::WRITECONCERN) {
+			$opts['writeConcern'] = new MongoWriteConcern($w, self::WRITETIMEOUT);
+		}
+
+		self::$client->executeBulkWrite(Config::DBNAME . '.' . $collection, $bulk, $opts);
 	}
 
 	static public function insert($collection, $record = [], $w = 0) {
