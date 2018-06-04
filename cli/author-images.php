@@ -3,8 +3,6 @@
 
 namespace Sacfeed;
 
-use MongoDate;
-
 use Sacfeed\DB\Author;
 
 require __DIR__ . '/../sys/bootstrap.php';

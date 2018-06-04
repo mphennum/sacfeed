@@ -3,8 +3,6 @@
 
 namespace Sacfeed;
 
-use MongoDate;
-
 use Sacfeed\DB\Section;
 use Sacfeed\DB\Article;
 

@@ -2,7 +2,7 @@
 
 namespace Sacfeed\DB;
 
-use MongoDate;
+use MongoDB\BSON\UTCDateTime as MongoDateTime;
 
 use Sacfeed\CLI;
 use Sacfeed\Database;
@@ -39,7 +39,7 @@ class Article extends Record {
 			'content' => $this->fields['content'],
 			'summary' => $this->fields['summary'],
 			'url' => $this->fields['url'],
-			'ts' => $this->fields['ts']->sec * 1000 + ($this->fields['ts']->usec / 1000)
+			'ts' => $this->fields['ts']->toDateTime()->getTimestamp() * 1000
 		];
 	}
 
@@ -55,9 +55,9 @@ class Article extends Record {
 
 		if (isset($json['pub_date'])) {
 			$ts = (int) $json['pub_date'];
-			$this->fields['ts'] = new MongoDate($ts / 1000);
+			$this->fields['ts'] = new MongoDateTime($ts);
 		} else {
-			$this->fields['ts'] = new MongoDate();
+			$this->fields['ts'] = new MongoDateTime();
 		}
 
 		if (isset($json['assets']['Photo'][0])) {

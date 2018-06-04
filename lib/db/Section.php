@@ -2,7 +2,7 @@
 
 namespace Sacfeed\DB;
 
-use MongoDate;
+use MongoDB\BSON\UTCDateTime as MongoDateTime;
 
 use Sacfeed\Database;
 
@@ -24,7 +24,7 @@ class Section extends Record {
 		return [
 			'id' => $this->fields['_id'],
 			'name' => $this->fields['name'],
-			'ts' => $this->fields['ts']->sec * 1000 + ($this->fields['ts']->usec / 1000)
+			'ts' => $this->fields['ts']->toDateTime()->getTimestamp() * 1000
 		];
 	}
 
@@ -38,7 +38,7 @@ class Section extends Record {
 	}
 
 	static public function requested($id = null) {
-		Database::update(self::COLLECTION, ($id === null) ? [] : ['_id' => $id], ['$set' => ['ts' => new MongoDate()]], 0, true);
+		Database::update(self::COLLECTION, ($id === null) ? [] : ['_id' => $id], ['$set' => ['ts' => new MongoDateTime()]], 0, true);
 	}
 
 	static public function find($query = [], $projection = []) {
