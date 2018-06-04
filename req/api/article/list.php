@@ -85,7 +85,7 @@ class APIArticleList extends Request {
 		}
 
 		$articles = [];
-		$cursor = Article::find($find)->sort(['ts' => -1])->limit($this->params['n']);
+		$cursor = Article::find($find, null, ['ts' => -1], $this->params['n']);
 		foreach ($cursor as $record) {
 			$article = new Article($record);
 			$articles[] = $article->getAPIFields();

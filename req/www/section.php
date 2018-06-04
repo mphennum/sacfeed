@@ -51,7 +51,7 @@ class WWWSection extends Request {
 		}
 
 		$articles = [];
-		$cursor = Article::find($find)->sort(['ts' => -1])->limit(24);
+		$cursor = Article::find($find, null, ['ts' => -1], 24);
 		foreach ($cursor as $record) {
 			$article = new Article($record);
 			$articles[] = $article->getAPIFields();

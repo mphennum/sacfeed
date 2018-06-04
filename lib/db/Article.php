@@ -97,8 +97,8 @@ class Article extends Record {
 		}
 	}
 
-	static public function find($query = [], $projection = []) {
-		Section::requested(isset($query['section']) ? $query['section'] : null);
-		return Database::find(self::COLLECTION, $query, $projection);
+	static public function find(array $query = [], array $projection = null, array $sort = null, $limit = null) {
+		Section::requested($query['section'] ?? null);
+		return Database::find(self::COLLECTION, $query, $projection, $sort, $limit);
 	}
 }
