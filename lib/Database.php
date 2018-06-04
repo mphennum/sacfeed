@@ -5,6 +5,7 @@ namespace Sacfeed;
 use Exception;
 use MongoDB\Driver\Manager as MongoManager;
 use MongoDB\Driver\Command as MongoCommand;
+use MongoDB\Driver\Query as MongoQuery;
 
 abstract class Database {
 
@@ -28,7 +29,7 @@ abstract class Database {
 	// commands
 
 	static public function distinct($collection, $field, $query = []) {
-		$cursor = self::$client->executeCommand(
+		$cursor = self::$client->executeReadCommand(
 			Config::DBNAME,
 			new MongoCommand([
 				'distinct' => $collection,
@@ -40,8 +41,28 @@ abstract class Database {
 		return $cursor->toArray()[0]->values;
 	}
 
-	static public function find($collection, $query = [], $projection = []) {
-		return self::$mongo->$collection->find($query, $projection);
+	static public function find($collection, array $query = [], array $projection = null, array $sort = null, $limit = null) {
+		$opts = [];
+
+		if ($projection !== null) {
+			$opts['projection'] = $projection;
+		}
+
+		if ($sort !== null) {
+			$opts['sort'] = $sort;
+		}
+
+		if ($limit !== null) {
+			$opts['limit'] = $limit;
+		}
+
+		$cursor = self::$client->executeQuery(
+			Config::DBNAME . '.' . $collection,
+			new MongoQuery($query, $opts)
+		);
+
+		$cursor->setTypeMap(['root' => 'array']);
+		return $cursor;
 	}
 
 	static public function findOne($collection, $query = [], $projection = []) {
