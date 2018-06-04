@@ -125,14 +125,14 @@ abstract class Database {
 			$w = 0;
 		}
 
-		$bulk = new MongoBulkWrite(['ordered' => false]);
-		for ($i = 0; $i < $n; ++$i) {
-			$bulk->insert($records[$i]);
-		}
-
 		$opts = [];
 		if ($w !== self::WRITECONCERN) {
 			$opts['writeConcern'] = new MongoWriteConcern($w, self::WRITETIMEOUT);
+		}
+
+		$bulk = new MongoBulkWrite(['ordered' => false]);
+		for ($i = 0; $i < $n; ++$i) {
+			$bulk->insert($records[$i]);
 		}
 
 		self::$client->executeBulkWrite(Config::DBNAME . '.' . $collection, $bulk, $opts);
@@ -162,17 +162,12 @@ abstract class Database {
 			$opts['writeConcern'] = new MongoWriteConcern($w, self::WRITETIMEOUT);
 		}
 
-		self::$client->executeWriteCommand(
-			Config::DBNAME,
-			new MongoCommand([
-				'insert' => $collection,
-				'documents' => [$record]
-			]),
-			$opts
-		);
+		$bulk = new MongoBulkWrite(['ordered' => false]);
+		$bulk->insert($record);
+		self::$client->executeBulkWrite(Config::DBNAME . '.' . $collection, $bulk, $opts);
 	}
 
-	static public function update($collection, $query = [], $record = [], $w = 0, $multi = false) {
+	static public function update($collection, array $query = [], array $record = [], $w = 0, $multi = false) {
 		if (empty($record)) {
 			return;
 		}
@@ -189,7 +184,18 @@ abstract class Database {
 			return;
 		}
 
-		self::$mongo->$collection->update($query, $record, ['w' => $w, 'multiple' => $multi]);
+		if ($w === false) {
+			$w = 0;
+		}
+
+		$opts = [];
+		if ($w !== self::WRITECONCERN) {
+			$opts['writeConcern'] = new MongoWriteConcern($w, self::WRITETIMEOUT);
+		}
+
+		$bulk = new MongoBulkWrite(['ordered' => false]);
+		$bulk->update($query, $record, ['multi' => $multi]);
+		self::$client->executeBulkWrite(Config::DBNAME . '.' . $collection, $bulk, $opts);
 	}
 
 	static public function remove($collection, $query = [], $w = 0, $multi = false) {
