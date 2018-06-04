@@ -92,7 +92,7 @@ abstract class Database {
 		return $results[0] ?? null;
 	}
 
-	static public function batchInsert($collection, $records = [], $w = 0) {
+	static public function batchInsert($collection, array $records = [], $w = 0) {
 		if (empty($records)) {
 			return;
 		}
@@ -131,7 +131,6 @@ abstract class Database {
 		}
 
 		$opts = [];
-
 		if ($w !== self::WRITECONCERN) {
 			$opts['writeConcern'] = new MongoWriteConcern($w, self::WRITETIMEOUT);
 		}
@@ -139,7 +138,7 @@ abstract class Database {
 		self::$client->executeBulkWrite(Config::DBNAME . '.' . $collection, $bulk, $opts);
 	}
 
-	static public function insert($collection, $record = [], $w = 0) {
+	static public function insert($collection, array $record = [], $w = 0) {
 		if (empty($record)) {
 			return;
 		}
@@ -158,7 +157,19 @@ abstract class Database {
 			$w = 0;
 		}
 
-		self::$mongo->$collection->insert($record, ['w' => $w]);
+		$opts = [];
+		if ($w !== self::WRITECONCERN) {
+			$opts['writeConcern'] = new MongoWriteConcern($w, self::WRITETIMEOUT);
+		}
+
+		self::$client->executeWriteCommand(
+			Config::DBNAME,
+			new MongoCommand([
+				'insert' => $collection,
+				'documents' => [$record]
+			]),
+			$opts
+		);
 	}
 
 	static public function update($collection, $query = [], $record = [], $w = 0, $multi = false) {
