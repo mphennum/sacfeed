@@ -38,6 +38,18 @@ abstract class Database {
 
 	// commands
 
+	static public function count($collection, array $query = []) {
+		$cursor = self::$client->executeReadCommand(
+			Config::DBNAME,
+			new MongoCommand([
+				'count' => $collection,
+				'query' => $query
+			])
+		);
+
+		return $cursor->toArray()[0]->n;
+	}
+
 	static public function distinct($collection, $field, array $query = []) {
 		$cursor = self::$client->executeReadCommand(
 			Config::DBNAME,
