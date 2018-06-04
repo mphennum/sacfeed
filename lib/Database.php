@@ -215,7 +215,14 @@ abstract class Database {
 			$w = 0;
 		}
 
-		self::$mongo->$collection->remove($query, ['w' => $w, 'justOne' => !$multi]);
+		$opts = [];
+		if ($w !== self::WRITECONCERN) {
+			$opts['writeConcern'] = new MongoWriteConcern($w, self::WRITETIMEOUT);
+		}
+
+		$bulk = new MongoBulkWrite(['ordered' => false]);
+		$bulk->delete($query, ['limit' => !$multi]);
+		self::$client->executeBulkWrite(Config::DBNAME . '.' . $collection, $bulk, $opts);
 	}
 
 	static public function shutdown() {
