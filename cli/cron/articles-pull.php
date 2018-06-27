@@ -19,7 +19,7 @@ foreach ($cursor as $record) {
 
 	CLI::subtitle($section);
 
-	$url = 'http://' . Config::SACBEEHOST . $section . Config::JSONQUERY;
+	$url = 'https://' . Config::SACBEEHOST . $section . Config::JSONQUERY;
 	$ch = curl_init($url);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	$json = curl_exec($ch);
