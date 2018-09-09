@@ -30,6 +30,7 @@ abstract class Database {
 			[
 				'username' => Config::DBUSER,
 				'password' => Config::DBPASS,
+				'authSource' => Config::DBNAME,
 				'w' => self::WRITECONCERN,
 				'wTimeoutMS' => self::WRITETIMEOUT
 			]
