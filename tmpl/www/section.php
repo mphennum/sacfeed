@@ -42,7 +42,7 @@ if (!empty($response['articles'])) {
 
 <div class="sf-wrapper">
 
-<h1><a href="http://<?= Config::WWWHOST ?>/">sacfeed</a></h1>
+<h1><a href="//<?= Config::WWWHOST ?>/">sacfeed</a></h1>
 
 <button class="sf-navbtn"><hr><hr><hr></button>
 
@@ -50,7 +50,7 @@ if (!empty($response['articles'])) {
 <?
 
 foreach ($response['sections'] as $section) {
-	echo '<a href="http://', Config::WWWHOST, $section['id'], '">', $section['name'], '</a>', "\n";
+	echo '<a href="//', Config::WWWHOST, $section['id'], '">', $section['name'], '</a>', "\n";
 }
 
 ?>

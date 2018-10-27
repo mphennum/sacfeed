@@ -25,7 +25,7 @@ header('Content-Type: text/html; charset=UTF-8');
 
 <div class="sf-wrapper">
 
-<h1><a href="http://<?= Config::WWWHOST ?>/">sacfeed</a></h1>
+<h1><a href="//<?= Config::WWWHOST ?>/">sacfeed</a></h1>
 
 <button class="sf-navbtn"><hr><hr><hr></button>
 

@@ -53,12 +53,12 @@ abstract class App {
 
 		if ($opts['host'] === self::API) {
 			$origin = isset($opts['origin']) ? $opts['origin'] : null;
-			if (!Config::DEVMODE && $origin !== 'http://' . Config::WWWHOST) {
+			if (!Config::DEVMODE && $origin !== 'https://' . Config::WWWHOST) {
 				// return an error
 				exit(0);
 			}
 
-			header('Access-Control-Allow-Origin: http://' . Config::WWWHOST);
+			header('Access-Control-Allow-Origin: https://' . Config::WWWHOST);
 
 			if ($opts['method'] === 'OPTIONS') {
 				header('Access-Control-Max-Age: 3600');
