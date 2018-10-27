@@ -1,5 +1,5 @@
 # sacfeed
 
-Latest links to articles from [sacbee.com](http://sacbee.com) by section via RSS feed.
+Latest links to articles from [sacbee.com](https://sacbee.com) by section via RSS feed.
 
-[sacfeed.mphennum.com](http://sacfeed.mphennum.com)
+[sacfeed.mphennum.com](https://sacfeed.mphennum.com)
