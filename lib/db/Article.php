@@ -84,7 +84,9 @@ class Article extends Record {
 				CURLOPT_NOBODY => true,
 				CURLOPT_RETURNTRANSFER => true,
 				CURLOPT_FOLLOWLOCATION => true,
-				CURLOPT_MAXREDIRS => 5
+				CURLOPT_MAXREDIRS => 5,
+				CURLOPT_TIMEOUT => 15,
+				CURLOPT_USERAGENT => 'curl/7.29.0',
 			]);
 
 			$header = curl_exec($ch);
