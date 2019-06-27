@@ -20,12 +20,24 @@ foreach ($cursor as $record) {
 	CLI::subtitle($section);
 
 	$url = 'https://' . Config::SACBEEHOST . $section . Config::JSONQUERY;
+	// $url = 'https://www.sacbee.com/?widgetName=rssfeed&widgetContentId=339621&getJsonFeed=true&service=json';
 	$ch = curl_init();
 	curl_setopt_array($ch, [
 		CURLOPT_URL => $url,
 		CURLOPT_RETURNTRANSFER => true,
-		CURLOPT_USERAGENT => 'curl/7.29.0',
+		// CURLOPT_USERAGENT => 'curl/7.29.0',
+		CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36',
 		CURLOPT_TIMEOUT => 15,
+		CURLOPT_ENCODING => 'gzip',
+		CURLOPT_HTTPHEADER => [
+			'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
+			// 'Accept-encoding: gzip, deflate, br',
+			'Accept-Language: en-US,en;q=0.9',
+			'Cache-Control: no-cache',
+			'DNT: 1',
+			'Pragma: no-cache',
+			'Upgrade-Insecure-Requests: 1',
+		],
 	]);
 
 	$json = curl_exec($ch);
@@ -61,10 +73,10 @@ foreach ($cursor as $record) {
 
 		CLI::message('[' . $id . '] ', $article->title);
 
-		sleep(1);
+		usleep(mt_rand(1000000, 5000000));
 	}
 
-	sleep(1);
+	usleep(mt_rand(1000000, 5000000));
 }
 
 CLI::notice($no . ' articles updated');
