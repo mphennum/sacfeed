@@ -10,6 +10,7 @@ abstract class App {
 
 	static public $utc;
 	static public $local;
+	static public $authenticated;
 
 	static public function init($local = false) {
 		register_shutdown_function([__CLASS__, 'shutdown']);
@@ -37,6 +38,7 @@ abstract class App {
 
 		//$opts['ip'] = isset($_COOKIE['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : null;
 		//$opts['agent'] = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null;
+		$opts['api-key'] = isset($_SERVER['HTTP_X_API_KEY']) ? $_SERVER['HTTP_X_API_KEY'] : null;
 		$opts['secure'] = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
 		$opts['dnt'] = (isset($_SERVER['HTTP_DNT']) && $_SERVER['HTTP_DNT']);
 		$opts['referer'] = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : null;
@@ -55,9 +57,17 @@ abstract class App {
 			$opts['params'] = $_GET;
 		}
 
+		if ($opts['api-key'] !== null) {
+			self::$authenticated = ($opts['api-key'] === Config::APIKEY);
+			if (!self::$authenticated) {
+				exit(0);
+			}
+		} else {
+			self::$authenticated = false;
+		}
+
 		if ($opts['host'] === self::API) {
-			$origin = isset($opts['origin']) ? $opts['origin'] : null;
-			if (!Config::DEVMODE && $origin !== 'https://' . Config::WWWHOST) {
+			if (!Config::DEVMODE && !self::$authenticated && $opts['origin'] !== 'https://' . Config::WWWHOST) {
 				// return an error
 				exit(0);
 			}
