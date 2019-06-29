@@ -9,8 +9,9 @@ abstract class App {
 	const API = 1;
 
 	static public $utc;
+	static public $local;
 
-	static public function init() {
+	static public function init($local = false) {
 		register_shutdown_function([__CLASS__, 'shutdown']);
 
 		if (!Config::DEVMODE && PHP_SAPI !== 'cli') {
@@ -18,10 +19,13 @@ abstract class App {
 			ob_start();
 		}
 
+		self::$local = $local;
 		self::$utc = new DateTimeZone('UTC');
 
-		Database::init();
-		Cache::init();
+		if (!$local) {
+			Database::init();
+			Cache::init();
+		}
 	}
 
 	static public function handle() {
@@ -88,8 +92,10 @@ abstract class App {
 		ignore_user_abort(true);
 		set_time_limit(0);
 
-		Database::shutdown();
-		Cache::shutdown();
+		if (!self::$local) {
+			Database::shutdown();
+			Cache::shutdown();
+		}
 
 		gc_collect_cycles();
 		exit(0);
