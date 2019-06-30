@@ -25,19 +25,10 @@ foreach ($cursor as $record) {
 	curl_setopt_array($ch, [
 		CURLOPT_URL => $url,
 		CURLOPT_RETURNTRANSFER => true,
-		// CURLOPT_USERAGENT => 'curl/7.29.0',
-		CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36',
+		CURLOPT_USERAGENT => Config::CURLUSERAGENT,
 		CURLOPT_TIMEOUT => 15,
 		CURLOPT_ENCODING => 'gzip',
-		CURLOPT_HTTPHEADER => [
-			'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
-			// 'Accept-encoding: gzip, deflate, br',
-			'Accept-Language: en-US,en;q=0.9',
-			'Cache-Control: no-cache',
-			'DNT: 1',
-			'Pragma: no-cache',
-			'Upgrade-Insecure-Requests: 1',
-		],
+		CURLOPT_HTTPHEADER => Config::$curlHeaders,
 	]);
 
 	$json = curl_exec($ch);
