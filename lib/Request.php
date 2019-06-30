@@ -24,6 +24,7 @@ class Request {
 
 	public $opts;
 	public $method;
+	public $authenticate;
 	public $params;
 	public $template;
 	public $response;
@@ -31,8 +32,9 @@ class Request {
 	public function __construct($opts = []) {
 		$this->opts = $opts;
 		$this->method = 'GET';
-		$this->params = [];
-		$this->headers = [];
+		$this->authenticate = false;
+		$this->params = [ ];
+		$this->headers = [ ];
 		$this->response = new Response();
 	}
 
@@ -45,6 +47,11 @@ class Request {
 
 		if ($opts['method'] !== $this->method) {
 			$this->response->methodNotAllowed('Only "' . $this->method . '" method allowed for this request');
+			return false;
+		}
+
+		if ($this->authenticate && !App::$authenticated) {
+			$this->response->unauthorized('This request requires authentication');
 			return false;
 		}
 
@@ -101,6 +108,10 @@ class Request {
 				if (isset($param['regex']) && !preg_match($param['regex'], $value)) {
 					$this->response->notAcceptable('Parameter "' . $key . '" has an invalid value');
 					return false;
+				}
+			} else if ($type === 'object') {
+				if (!is_array($value)) {
+					return $this->response->notAcceptable('Parameter "' . $key . '" must be an object');
 				}
 			}
 
@@ -249,7 +260,7 @@ class Request {
 
 		$params = [];
 		foreach ($opts['params'] as $key => $value) {
-			$params[rawurldecode($key)] = self::decodeParam($value);
+			$params[rawurldecode($key)] = is_string($value) ? self::decodeParam($value) : $value;
 		}
 
 		$opts['params'] = $params;
@@ -294,10 +305,10 @@ class Request {
 		}
 
 		// invalid method
-		if ($opts['method'] !== 'GET') {
+		if ($opts['method'] !== 'GET' && $opts['method'] !== 'POST') {
 			$request = new Request($opts);
 			$request->template = $opts['format'];
-			$request->response->methodNotAllowed('Only GET permitted');
+			$request->response->methodNotAllowed('Only GET, POST permitted');
 			return $request;
 		}
 
@@ -438,8 +449,8 @@ class Request {
 
 		if (preg_match('/^\[[^,]+(,[^,]*)*\]$/', $param)) {
 			$params = explode(',', trim($param, '[]'));
-			foreach ($params as &$param) {
-				$param = self::decodeParam($param);
+			foreach ($params as $k => $param) {
+				$params[$k] = self::decodeParam($param);
 			}
 
 			return $params;
