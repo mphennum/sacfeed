@@ -3,6 +3,7 @@
 namespace Sacfeed;
 
 use DateTimeZone;
+use Exception;
 
 abstract class App {
 	const WWW = 0;
@@ -52,7 +53,13 @@ abstract class App {
 		}
 
 		if ($opts['method'] === 'POST' || $opts['method'] === 'PUT') {
-			$opts['params'] = $_POST;
+			try {
+				$input = file_get_contents('php://input');
+				$opts['params'] = json_decode($input, true);
+				// var_dump($opts['params']); exit;
+			} catch (Exception $e) {
+				exit(0);
+			}
 		} else {
 			$opts['params'] = $_GET;
 		}
@@ -76,7 +83,7 @@ abstract class App {
 
 			if ($opts['method'] === 'OPTIONS') {
 				header('Access-Control-Max-Age: 3600');
-				header('Access-Control-Allow-Methods: GET, HEAD, OPTIONS');
+				header('Access-Control-Allow-Methods: GET, POST, HEAD, OPTIONS');
 				exit(0);
 			}
 		}
