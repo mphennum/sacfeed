@@ -27,6 +27,9 @@ curl_setopt_array($ch, [
 $json = curl_exec($ch);
 $info = curl_getinfo($ch);
 
+//var_dump($json);
+//CLI::printr($info);
+
 if ($json === false || trim($json) === '' || $info['http_code'] !== 200) {
 	CLI::error('curl failed: ' . $url);
 }
